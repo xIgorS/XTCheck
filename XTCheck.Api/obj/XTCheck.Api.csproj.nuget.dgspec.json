@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/igorsedykh/Learn/XTCheck/XTCheck.Api/XTCheck.Api.csproj": {}
+    "/home/runner/work/XTCheck/XTCheck/XTCheck.Api/XTCheck.Api.csproj": {}
   },
   "projects": {
-    "/Users/igorsedykh/Learn/XTCheck/XTCheck.Api/XTCheck.Api.csproj": {
+    "/home/runner/work/XTCheck/XTCheck/XTCheck.Api/XTCheck.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/igorsedykh/Learn/XTCheck/XTCheck.Api/XTCheck.Api.csproj",
+        "projectUniqueName": "/home/runner/work/XTCheck/XTCheck/XTCheck.Api/XTCheck.Api.csproj",
         "projectName": "XTCheck.Api",
-        "projectPath": "/Users/igorsedykh/Learn/XTCheck/XTCheck.Api/XTCheck.Api.csproj",
-        "packagesPath": "/Users/igorsedykh/.nuget/packages/",
-        "outputPath": "/Users/igorsedykh/Learn/XTCheck/XTCheck.Api/obj/",
+        "projectPath": "/home/runner/work/XTCheck/XTCheck/XTCheck.Api/XTCheck.Api.csproj",
+        "packagesPath": "/home/runner/.nuget/packages/",
+        "outputPath": "/home/runner/work/XTCheck/XTCheck/XTCheck.Api/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/igorsedykh/.nuget/NuGet/NuGet.Config"
+          "/home/runner/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -72,7 +72,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.101/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.101/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

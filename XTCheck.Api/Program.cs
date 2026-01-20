@@ -8,6 +8,8 @@ builder.Services.AddControllers();
 builder.Services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
 builder.Services.AddScoped<ILogRepository, LogRepository>();
 builder.Services.AddScoped<ILogService, LogService>();
+builder.Services.AddScoped<IDbSizeStatsRepository, DbSizeStatsRepository>();
+builder.Services.AddScoped<IDbSizeStatsService, DbSizeStatsService>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
