@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("XTCheck.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d9eb9a4858d5749d9a4f54766a0687037f8c3771")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8f810c0a287aa113764d2a9f90611d462fb770f9")]
 [assembly: System.Reflection.AssemblyProductAttribute("XTCheck.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("XTCheck.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
