@@ -1,0 +1,58 @@
+# .gitignore for .NET projects (Visual Studio, VS Code, Rider)
+
+# Build output
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+
+# VS Code workspace
+.vscode/
+
+# NuGet
+*.nupkg
+packages/
+.nuget/
+
+# Azure Web App publish folder
+publish/
+
+# Dotnet artifacts
+artifacts/
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+
+# Generated files
+*.g.cs
+*.g.i.cs
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secrets and local settings
+secrets.json
+secrets.*
+*.local
+
+# SQL Server files
+*.mdf
+*.ldf
+
+# Docker compose override (local developer overrides)
+docker-compose.override.yml
