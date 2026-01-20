@@ -1,4 +1,3 @@
-using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
@@ -14,8 +13,10 @@ public class DbConnectionFactory : IDbConnectionFactory
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
     }
 
-    public IDbConnection CreateConnection()
+    public async Task<SqlConnection> CreateOpenConnectionAsync()
     {
-        return new SqlConnection(_connectionString);
+        var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
+        return connection;
     }
 }

@@ -1,6 +1,7 @@
-@XTCheck.Api_HostAddress = http://localhost:5239
+@xtcheck_api_host = http://localhost:5239
 
-GET {{XTCheck.Api_HostAddress}}/weatherforecast/
+# Database size stats
+GET {{xtcheck_api_host}}/api/DbSizeStats
 Accept: application/json
 
 ###
