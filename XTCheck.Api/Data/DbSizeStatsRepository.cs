@@ -35,6 +35,11 @@ public class DbSizeStatsRepository : IDbSizeStatsRepository
             using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
+                var driveOrdinal = reader.GetOrdinal("Drive");
+                var totalDriveGBOrdinal = reader.GetOrdinal("TotalDriveGB");
+                var freeDriveGBOrdinal = reader.GetOrdinal("FreeDriveGB");
+                var freePercentOrdinal = reader.GetOrdinal("FreePercent");
+
                 results.Add(new DbSizeStats
                 {
                     DatabaseName = reader.GetString(reader.GetOrdinal("DatabaseName")),
@@ -45,10 +50,10 @@ public class DbSizeStatsRepository : IDbSizeStatsRepository
                     DatabaseFileSizeMB = reader.GetDecimal(reader.GetOrdinal("DatabaseFileSizeMB")),
                     MaxSize = reader.GetString(reader.GetOrdinal("MaxSize")),
                     AutogrowSize = reader.GetString(reader.GetOrdinal("AutogrowSize")),
-                    Drive = reader.GetString(reader.GetOrdinal("Drive")),
-                    TotalDriveGB = reader.GetInt64(reader.GetOrdinal("TotalDriveGB")),
-                    FreeDriveGB = reader.GetInt64(reader.GetOrdinal("FreeDriveGB")),
-                    FreePercent = reader.GetDecimal(reader.GetOrdinal("FreePercent"))
+                    Drive = reader.IsDBNull(driveOrdinal) ? "N/A" : reader.GetString(driveOrdinal),
+                    TotalDriveGB = reader.IsDBNull(totalDriveGBOrdinal) ? 0 : reader.GetInt64(totalDriveGBOrdinal),
+                    FreeDriveGB = reader.IsDBNull(freeDriveGBOrdinal) ? 0 : reader.GetInt64(freeDriveGBOrdinal),
+                    FreePercent = reader.IsDBNull(freePercentOrdinal) ? 0 : reader.GetDecimal(freePercentOrdinal)
                 });
             }
         }
@@ -62,6 +67,11 @@ public class DbSizeStatsRepository : IDbSizeStatsRepository
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
+                var driveOrdinal = reader.GetOrdinal("Drive");
+                var totalDriveGBOrdinal = reader.GetOrdinal("TotalDriveGB");
+                var freeDriveGBOrdinal = reader.GetOrdinal("FreeDriveGB");
+                var freePercentOrdinal = reader.GetOrdinal("FreePercent");
+
                 results.Add(new DbSizeStats
                 {
                     DatabaseName = reader.GetString(reader.GetOrdinal("DatabaseName")),
@@ -72,10 +82,10 @@ public class DbSizeStatsRepository : IDbSizeStatsRepository
                     DatabaseFileSizeMB = reader.GetDecimal(reader.GetOrdinal("DatabaseFileSizeMB")),
                     MaxSize = reader.GetString(reader.GetOrdinal("MaxSize")),
                     AutogrowSize = reader.GetString(reader.GetOrdinal("AutogrowSize")),
-                    Drive = reader.GetString(reader.GetOrdinal("Drive")),
-                    TotalDriveGB = reader.GetInt64(reader.GetOrdinal("TotalDriveGB")),
-                    FreeDriveGB = reader.GetInt64(reader.GetOrdinal("FreeDriveGB")),
-                    FreePercent = reader.GetDecimal(reader.GetOrdinal("FreePercent"))
+                    Drive = reader.IsDBNull(driveOrdinal) ? "N/A" : reader.GetString(driveOrdinal),
+                    TotalDriveGB = reader.IsDBNull(totalDriveGBOrdinal) ? 0 : reader.GetInt64(totalDriveGBOrdinal),
+                    FreeDriveGB = reader.IsDBNull(freeDriveGBOrdinal) ? 0 : reader.GetInt64(freeDriveGBOrdinal),
+                    FreePercent = reader.IsDBNull(freePercentOrdinal) ? 0 : reader.GetDecimal(freePercentOrdinal)
                 });
             }
         }
