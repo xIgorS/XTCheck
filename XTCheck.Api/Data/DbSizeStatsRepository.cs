@@ -30,36 +30,43 @@ public class DbSizeStatsRepository : IDbSizeStatsRepository
 
         using var reader = await command.ExecuteReaderAsync();
         
-        // Get column ordinals once outside the loop for better performance
+        var extTimeOrdinal = reader.GetOrdinal("ExtTime");
+        var instanceNameOrdinal = reader.GetOrdinal("InstanceName");
         var databaseNameOrdinal = reader.GetOrdinal("DatabaseName");
         var logicalFileNameOrdinal = reader.GetOrdinal("LogicalFileName");
         var fileGroupOrdinal = reader.GetOrdinal("FileGroup");
         var physicalFileNameOrdinal = reader.GetOrdinal("PhysicalFileName");
         var fileTypeOrdinal = reader.GetOrdinal("FileType");
-        var databaseFileSizeMBOrdinal = reader.GetOrdinal("DatabaseFileSizeMB");
-        var maxSizeOrdinal = reader.GetOrdinal("MaxSize");
+        var allocatedSpaceMBOrdinal = reader.GetOrdinal("AllocatedSpaceMB");
+        var usedSpaceMBOrdinal = reader.GetOrdinal("UsedSpaceMB");
+        var freeSpaceMBOrdinal = reader.GetOrdinal("FreeSpaceMB");
+        var usedPercentOrdinal = reader.GetOrdinal("UsedPercent");
+        var maxSizeMBOrdinal = reader.GetOrdinal("MaxSizeMB");
         var autogrowSizeOrdinal = reader.GetOrdinal("AutogrowSize");
-        var driveOrdinal = reader.GetOrdinal("Drive");
-        var totalDriveGBOrdinal = reader.GetOrdinal("TotalDriveGB");
-        var freeDriveGBOrdinal = reader.GetOrdinal("FreeDriveGB");
-        var freePercentOrdinal = reader.GetOrdinal("FreePercent");
+        var totalDriveMBOrdinal = reader.GetOrdinal("TotalDriveMB");
+        var freeDriveMBOrdinal = reader.GetOrdinal("FreeDriveMB");
+        var freeDrivePercentOrdinal = reader.GetOrdinal("FreeDrivePercent");
 
         while (await reader.ReadAsync())
         {
             results.Add(new DbSizeStats
             {
+                ExtTime = reader.GetDateTime(extTimeOrdinal),
+                InstanceName = reader.GetString(instanceNameOrdinal),
                 DatabaseName = reader.GetString(databaseNameOrdinal),
                 LogicalFileName = reader.GetString(logicalFileNameOrdinal),
                 FileGroup = reader.GetString(fileGroupOrdinal),
                 PhysicalFileName = reader.GetString(physicalFileNameOrdinal),
                 FileType = reader.GetString(fileTypeOrdinal),
-                DatabaseFileSizeMB = reader.GetDecimal(databaseFileSizeMBOrdinal),
-                MaxSize = reader.GetString(maxSizeOrdinal),
+                AllocatedSpaceMB = reader.GetDecimal(allocatedSpaceMBOrdinal),
+                UsedSpaceMB = reader.GetDecimal(usedSpaceMBOrdinal),
+                FreeSpaceMB = reader.GetDecimal(freeSpaceMBOrdinal),
+                UsedPercent = reader.GetInt32(usedPercentOrdinal),
+                MaxSizeMB = reader.GetDecimal(maxSizeMBOrdinal),
                 AutogrowSize = reader.GetString(autogrowSizeOrdinal),
-                Drive = reader.IsDBNull(driveOrdinal) ? "N/A" : reader.GetString(driveOrdinal),
-                TotalDriveGB = reader.IsDBNull(totalDriveGBOrdinal) ? 0 : reader.GetInt64(totalDriveGBOrdinal),
-                FreeDriveGB = reader.IsDBNull(freeDriveGBOrdinal) ? 0 : reader.GetInt64(freeDriveGBOrdinal),
-                FreePercent = reader.IsDBNull(freePercentOrdinal) ? 0 : reader.GetDecimal(freePercentOrdinal)
+                TotalDriveMB = reader.GetDecimal(totalDriveMBOrdinal),
+                FreeDriveMB = reader.GetDecimal(freeDriveMBOrdinal),
+                FreeDrivePercent = reader.GetDecimal(freeDrivePercentOrdinal)
             });
         }
 
