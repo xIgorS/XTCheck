@@ -1,0 +1,320 @@
+@page "/dbsizestats"
+@inject IDbSizeStatsApiClient ApiClient
+@rendermode InteractiveServer
+
+<PageTitle>Database Size Statistics</PageTitle>
+
+<h1>Database Size Statistics</h1>
+
+@if (isLoading)
+{
+    <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Large">
+        <Template>Loading...</Template>
+    </RadzenProgressBarCircular>
+}
+else if (errorMessage != null)
+{
+    <RadzenAlert AlertStyle="AlertStyle.Danger" Shade="Shade.Light" AllowClose="false">
+        @errorMessage
+    </RadzenAlert>
+    <RadzenButton Text="Retry" Click="LoadData" Style="margin-top: 10px;" />
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6">
+            <RadzenCard>
+                <h4>Select Database</h4>
+                <RadzenDropDown @bind-Value="selectedDatabase" 
+                                Data="@databases" 
+                                TextProperty="DatabaseName" 
+                                ValueProperty="DatabaseName"
+                                Placeholder="Select a database..."
+                                Style="width: 100%;"
+                                Change="OnDatabaseSelected" />
+            </RadzenCard>
+        </div>
+        <div class="col-md-6">
+            <RadzenCard>
+                <RadzenButton Text="Refresh Data" Click="LoadData" Icon="refresh" />
+            </RadzenCard>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top: 20px;">
+        @* Donut Chart for Selected Database *@
+        <div class="col-md-6">
+            <RadzenCard>
+                <h4>@(selectedDatabase ?? "All Databases") - Space Usage</h4>
+                @if (selectedDatabaseData != null)
+                {
+                    <div style="text-align: center; margin-bottom: 10px;">
+                        <strong>Total Allocated: @selectedDatabaseData.TotalAllocatedMB.ToString("N2") MB</strong>
+                    </div>
+                    <RadzenChart Style="height: 350px;">
+                        <RadzenDonutSeries Data="@donutChartData" 
+                                           CategoryProperty="Category" 
+                                           ValueProperty="Value"
+                                           Title="Space (MB)">
+                            <RadzenSeriesDataLabels Visible="true" />
+                        </RadzenDonutSeries>
+                    </RadzenChart>
+                    <div style="text-align: center; margin-top: 10px;">
+                        <span style="color: #4CAF50;">■ Used: @selectedDatabaseData.TotalUsedMB.ToString("N2") MB (@selectedDatabaseData.UsedPercent%)</span>
+                        &nbsp;&nbsp;
+                        <span style="color: #2196F3;">■ Free: @selectedDatabaseData.TotalFreeMB.ToString("N2") MB</span>
+                    </div>
+                }
+                else
+                {
+                    <p>Select a database to view details</p>
+                }
+            </RadzenCard>
+        </div>
+
+        @* Stacked Bar Chart for All Databases *@
+        <div class="col-md-6">
+            <RadzenCard>
+                <h4>All Databases Comparison</h4>
+                <RadzenChart Style="height: 350px;">
+                    <RadzenCategoryAxis>
+                        <RadzenGridLines Visible="true" />
+                    </RadzenCategoryAxis>
+                    <RadzenValueAxis>
+                        <RadzenGridLines Visible="true" />
+                        <RadzenAxisTitle Text="Size (MB)" />
+                    </RadzenValueAxis>
+                    <RadzenStackedBarSeries Data="@databases" 
+                                             CategoryProperty="DatabaseName" 
+                                             ValueProperty="TotalUsedMB" 
+                                             Title="Used (MB)">
+                        <RadzenSeriesDataLabels Visible="false" />
+                    </RadzenStackedBarSeries>
+                    <RadzenStackedBarSeries Data="@databases" 
+                                             CategoryProperty="DatabaseName" 
+                                             ValueProperty="TotalFreeMB" 
+                                             Title="Free (MB)">
+                        <RadzenSeriesDataLabels Visible="false" />
+                    </RadzenStackedBarSeries>
+                </RadzenChart>
+            </RadzenCard>
+        </div>
+    </div>
+
+    @* Data Grid with Details *@
+    <div class="row" style="margin-top: 20px;">
+        <div class="col-12">
+            <RadzenCard>
+                <h4>Database Details</h4>
+                <RadzenDataGrid Data="@databases" TItem="DatabaseSizeAggregate" 
+                                AllowFiltering="true" AllowSorting="true" AllowPaging="true" 
+                                PageSize="10" PagerHorizontalAlign="HorizontalAlign.Center"
+                                ColumnWidth="200px">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="DatabaseSizeAggregate" Property="InstanceName" Title="Instance" Width="150px" />
+                        <RadzenDataGridColumn TItem="DatabaseSizeAggregate" Property="DatabaseName" Title="Database" Width="200px" />
+                        <RadzenDataGridColumn TItem="DatabaseSizeAggregate" Property="TotalAllocatedMB" Title="Allocated (MB)" FormatString="{0:N2}" Width="140px" />
+                        <RadzenDataGridColumn TItem="DatabaseSizeAggregate" Property="TotalUsedMB" Title="Used (MB)" FormatString="{0:N2}" Width="120px" />
+                        <RadzenDataGridColumn TItem="DatabaseSizeAggregate" Property="TotalFreeMB" Title="Free (MB)" FormatString="{0:N2}" Width="120px" />
+                        <RadzenDataGridColumn TItem="DatabaseSizeAggregate" Property="UsedPercent" Title="Used %" Width="100px">
+                            <Template Context="data">
+                                <RadzenProgressBar Value="@data.UsedPercent" Max="100" Style="height: 20px;" 
+                                                   ProgressBarStyle="@(data.UsedPercent > 90 ? ProgressBarStyle.Danger : data.UsedPercent > 75 ? ProgressBarStyle.Warning : ProgressBarStyle.Success)" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenCard>
+        </div>
+    </div>
+
+    @* FileGroup Statistics for Selected Database *@
+    @if (selectedDatabase != null && fileGroups.Any())
+    {
+        <div class="row" style="margin-top: 20px;">
+            <div class="col-md-6">
+                <RadzenCard>
+                    <h4>@selectedDatabase - FileGroup Breakdown</h4>
+                    <RadzenChart Style="height: 300px;">
+                        <RadzenColumnSeries Data="@fileGroups" 
+                                            CategoryProperty="FileGroup" 
+                                            ValueProperty="UsedMB" 
+                                            Title="Used (MB)" />
+                        <RadzenColumnSeries Data="@fileGroups" 
+                                            CategoryProperty="FileGroup" 
+                                            ValueProperty="FreeMB" 
+                                            Title="Free (MB)" />
+                        <RadzenCategoryAxis>
+                            <RadzenGridLines Visible="true" />
+                        </RadzenCategoryAxis>
+                        <RadzenValueAxis>
+                            <RadzenGridLines Visible="true" />
+                            <RadzenAxisTitle Text="Size (MB)" />
+                        </RadzenValueAxis>
+                        <RadzenLegend Position="LegendPosition.Bottom" />
+                    </RadzenChart>
+                </RadzenCard>
+            </div>
+            <div class="col-md-6">
+                <RadzenCard>
+                    <h4>FileGroup Details</h4>
+                    <RadzenDataGrid Data="@fileGroups" TItem="FileGroupAggregate" 
+                                    AllowSorting="true" 
+                                    ColumnWidth="120px"
+                                    Style="height: 300px;">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="FileGroupAggregate" Property="FileGroup" Title="FileGroup" Width="120px" />
+                            <RadzenDataGridColumn TItem="FileGroupAggregate" Property="FileType" Title="Type" Width="80px" />
+                            <RadzenDataGridColumn TItem="FileGroupAggregate" Property="FileCount" Title="Files" Width="60px" />
+                            <RadzenDataGridColumn TItem="FileGroupAggregate" Property="AllocatedMB" Title="Allocated" FormatString="{0:N2}" Width="100px" />
+                            <RadzenDataGridColumn TItem="FileGroupAggregate" Property="UsedMB" Title="Used" FormatString="{0:N2}" Width="100px" />
+                            <RadzenDataGridColumn TItem="FileGroupAggregate" Property="FreeMB" Title="Free" FormatString="{0:N2}" Width="100px" />
+                            <RadzenDataGridColumn TItem="FileGroupAggregate" Property="UsedPercent" Title="Used %" Width="100px">
+                                <Template Context="data">
+                                    <RadzenProgressBar Value="@data.UsedPercent" Max="100" Style="height: 18px;" 
+                                                       ProgressBarStyle="@(data.UsedPercent > 90 ? ProgressBarStyle.Danger : data.UsedPercent > 75 ? ProgressBarStyle.Warning : ProgressBarStyle.Success)" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+                </RadzenCard>
+            </div>
+        </div>
+    }
+
+    @* Disk Space Information *@
+    @if (diskSpaceInfo.Any())
+    {
+        <div class="row" style="margin-top: 20px;">
+            <div class="col-md-6">
+                <RadzenCard>
+                    <h4>Disk Space Overview</h4>
+                    <RadzenChart Style="height: 300px;">
+                        <RadzenDonutSeries Data="@diskChartData" 
+                                           CategoryProperty="Category" 
+                                           ValueProperty="Value"
+                                           Title="Disk Space (MB)">
+                            <RadzenSeriesDataLabels Visible="true" />
+                        </RadzenDonutSeries>
+                    </RadzenChart>
+                </RadzenCard>
+            </div>
+            <div class="col-md-6">
+                <RadzenCard>
+                    <h4>Disk Space Details</h4>
+                    <RadzenDataGrid Data="@diskSpaceInfo" TItem="DiskSpaceInfo" 
+                                    AllowSorting="true"
+                                    ColumnWidth="120px">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="DiskSpaceInfo" Property="DrivePath" Title="Drive" Width="100px" />
+                            <RadzenDataGridColumn TItem="DiskSpaceInfo" Property="TotalDriveMB" Title="Total (MB)" FormatString="{0:N0}" Width="120px" />
+                            <RadzenDataGridColumn TItem="DiskSpaceInfo" Property="UsedDriveMB" Title="Used (MB)" FormatString="{0:N0}" Width="120px" />
+                            <RadzenDataGridColumn TItem="DiskSpaceInfo" Property="FreeDriveMB" Title="Free (MB)" FormatString="{0:N0}" Width="120px" />
+                            <RadzenDataGridColumn TItem="DiskSpaceInfo" Property="UsedPercent" Title="Used %" Width="150px">
+                                <Template Context="data">
+                                    <RadzenProgressBar Value="@data.UsedPercent" Max="100" Style="height: 20px;" 
+                                                       ProgressBarStyle="@(data.UsedPercent > 90 ? ProgressBarStyle.Danger : data.UsedPercent > 80 ? ProgressBarStyle.Warning : ProgressBarStyle.Success)" 
+                                                       ShowValue="true" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+                </RadzenCard>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    private List<DatabaseSizeAggregate> databases = new();
+    private List<FileGroupAggregate> fileGroups = new();
+    private List<DiskSpaceInfo> diskSpaceInfo = new();
+    private string? selectedDatabase;
+    private DatabaseSizeAggregate? selectedDatabaseData;
+    private List<DonutChartItem> donutChartData = new();
+    private List<DonutChartItem> diskChartData = new();
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        errorMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            var result = await ApiClient.GetAggregatedDbSizeStatsAsync();
+            databases = result.ToList();
+
+            // Load disk space info
+            var diskResult = await ApiClient.GetDiskSpaceInfoAsync();
+            diskSpaceInfo = diskResult.ToList();
+            UpdateDiskChartData();
+
+            if (databases.Any())
+            {
+                selectedDatabase ??= databases.First().DatabaseName;
+                await UpdateSelectedDatabaseData();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load data: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task OnDatabaseSelected()
+    {
+        await UpdateSelectedDatabaseData();
+    }
+
+    private async Task UpdateSelectedDatabaseData()
+    {
+        selectedDatabaseData = databases.FirstOrDefault(d => d.DatabaseName == selectedDatabase);
+        
+        if (selectedDatabaseData != null)
+        {
+            donutChartData = new List<DonutChartItem>
+            {
+                new DonutChartItem { Category = "Used", Value = selectedDatabaseData.TotalUsedMB },
+                new DonutChartItem { Category = "Free", Value = selectedDatabaseData.TotalFreeMB }
+            };
+
+            // Load FileGroup stats for selected database
+            var fgResult = await ApiClient.GetFileGroupStatsAsync(selectedDatabase!);
+            fileGroups = fgResult.ToList();
+        }
+    }
+
+    private void UpdateDiskChartData()
+    {
+        if (diskSpaceInfo.Any())
+        {
+            // Aggregate all disk space for the chart
+            var totalUsed = diskSpaceInfo.Sum(d => d.UsedDriveMB);
+            var totalFree = diskSpaceInfo.Sum(d => d.FreeDriveMB);
+            
+            diskChartData = new List<DonutChartItem>
+            {
+                new DonutChartItem { Category = "Used", Value = totalUsed },
+                new DonutChartItem { Category = "Free", Value = totalFree }
+            };
+        }
+    }
+
+    private class DonutChartItem
+    {
+        public string Category { get; set; } = string.Empty;
+        public decimal Value { get; set; }
+    }
+}
