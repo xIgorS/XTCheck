@@ -100,24 +100,25 @@ else
         <div class="col-12">
             <RadzenCard>
                 <h4>Database Details</h4>
-                <RadzenDataGrid Data="@databases" TItem="DatabaseSizeAggregate" 
-                                AllowFiltering="true" AllowSorting="true" AllowPaging="true" 
-                                PageSize="10" PagerHorizontalAlign="HorizontalAlign.Center"
-                                ColumnWidth="200px">
-                    <Columns>
-                        <RadzenDataGridColumn TItem="DatabaseSizeAggregate" Property="InstanceName" Title="Instance" Width="150px" />
-                        <RadzenDataGridColumn TItem="DatabaseSizeAggregate" Property="DatabaseName" Title="Database" Width="200px" />
-                        <RadzenDataGridColumn TItem="DatabaseSizeAggregate" Property="TotalAllocatedMB" Title="Allocated (MB)" FormatString="{0:N2}" Width="140px" />
-                        <RadzenDataGridColumn TItem="DatabaseSizeAggregate" Property="TotalUsedMB" Title="Used (MB)" FormatString="{0:N2}" Width="120px" />
-                        <RadzenDataGridColumn TItem="DatabaseSizeAggregate" Property="TotalFreeMB" Title="Free (MB)" FormatString="{0:N2}" Width="120px" />
-                        <RadzenDataGridColumn TItem="DatabaseSizeAggregate" Property="UsedPercent" Title="Used %" Width="100px">
-                            <Template Context="data">
-                                <RadzenProgressBar Value="@data.UsedPercent" Max="100" Style="height: 20px;" 
-                                                   ProgressBarStyle="@(data.UsedPercent > 90 ? ProgressBarStyle.Danger : data.UsedPercent > 75 ? ProgressBarStyle.Warning : ProgressBarStyle.Success)" />
-                            </Template>
-                        </RadzenDataGridColumn>
-                    </Columns>
-                </RadzenDataGrid>
+                <div class="table-responsive">
+                    <QuickGrid Items="@databases.AsQueryable()" TItem="DatabaseSizeAggregate" Class="table table-striped table-hover align-middle">
+                        <PropertyColumn Title="Instance" Property="@(db => db.InstanceName)" Sortable="true" />
+                        <PropertyColumn Title="Database" Property="@(db => db.DatabaseName)" Sortable="true" />
+                        <TemplateColumn Title="Allocated (MB)">
+                            @context.TotalAllocatedMB.ToString("N2")
+                        </TemplateColumn>
+                        <TemplateColumn Title="Used (MB)">
+                            @context.TotalUsedMB.ToString("N2")
+                        </TemplateColumn>
+                        <TemplateColumn Title="Free (MB)">
+                            @context.TotalFreeMB.ToString("N2")
+                        </TemplateColumn>
+                        <TemplateColumn Title="Used %">
+                            <RadzenProgressBar Value="@context.UsedPercent" Max="100" Style="height: 20px;" 
+                                               ProgressBarStyle="@(context.UsedPercent > 90 ? ProgressBarStyle.Danger : context.UsedPercent > 75 ? ProgressBarStyle.Warning : ProgressBarStyle.Success)" />
+                        </TemplateColumn>
+                    </QuickGrid>
+                </div>
             </RadzenCard>
         </div>
     </div>
@@ -151,25 +152,26 @@ else
             <div class="col-md-6">
                 <RadzenCard>
                     <h4>FileGroup Details</h4>
-                    <RadzenDataGrid Data="@fileGroups" TItem="FileGroupAggregate" 
-                                    AllowSorting="true" 
-                                    ColumnWidth="120px"
-                                    Style="height: 300px;">
-                        <Columns>
-                            <RadzenDataGridColumn TItem="FileGroupAggregate" Property="FileGroup" Title="FileGroup" Width="120px" />
-                            <RadzenDataGridColumn TItem="FileGroupAggregate" Property="FileType" Title="Type" Width="80px" />
-                            <RadzenDataGridColumn TItem="FileGroupAggregate" Property="FileCount" Title="Files" Width="60px" />
-                            <RadzenDataGridColumn TItem="FileGroupAggregate" Property="AllocatedMB" Title="Allocated" FormatString="{0:N2}" Width="100px" />
-                            <RadzenDataGridColumn TItem="FileGroupAggregate" Property="UsedMB" Title="Used" FormatString="{0:N2}" Width="100px" />
-                            <RadzenDataGridColumn TItem="FileGroupAggregate" Property="FreeMB" Title="Free" FormatString="{0:N2}" Width="100px" />
-                            <RadzenDataGridColumn TItem="FileGroupAggregate" Property="UsedPercent" Title="Used %" Width="100px">
-                                <Template Context="data">
-                                    <RadzenProgressBar Value="@data.UsedPercent" Max="100" Style="height: 18px;" 
-                                                       ProgressBarStyle="@(data.UsedPercent > 90 ? ProgressBarStyle.Danger : data.UsedPercent > 75 ? ProgressBarStyle.Warning : ProgressBarStyle.Success)" />
-                                </Template>
-                            </RadzenDataGridColumn>
-                        </Columns>
-                    </RadzenDataGrid>
+                    <div class="table-responsive" style="height: 300px;">
+                        <QuickGrid Items="@fileGroups.AsQueryable()" TItem="FileGroupAggregate" Class="table table-striped table-hover align-middle">
+                            <PropertyColumn Title="FileGroup" Property="@(fg => fg.FileGroup)" Sortable="true" />
+                            <PropertyColumn Title="Type" Property="@(fg => fg.FileType)" Sortable="true" />
+                            <PropertyColumn Title="Files" Property="@(fg => fg.FileCount)" Sortable="true" />
+                            <TemplateColumn Title="Allocated">
+                                @context.AllocatedMB.ToString("N2")
+                            </TemplateColumn>
+                            <TemplateColumn Title="Used">
+                                @context.UsedMB.ToString("N2")
+                            </TemplateColumn>
+                            <TemplateColumn Title="Free">
+                                @context.FreeMB.ToString("N2")
+                            </TemplateColumn>
+                            <TemplateColumn Title="Used %">
+                                <RadzenProgressBar Value="@context.UsedPercent" Max="100" Style="height: 18px;" 
+                                                   ProgressBarStyle="@(context.UsedPercent > 90 ? ProgressBarStyle.Danger : context.UsedPercent > 75 ? ProgressBarStyle.Warning : ProgressBarStyle.Success)" />
+                            </TemplateColumn>
+                        </QuickGrid>
+                    </div>
                 </RadzenCard>
             </div>
         </div>
@@ -220,23 +222,25 @@ else
             <div class="col-md-6">
                 <RadzenCard>
                     <h4>Disk Space Details</h4>
-                    <RadzenDataGrid Data="@diskSpaceInfo" TItem="DiskSpaceInfo" 
-                                    AllowSorting="true"
-                                    ColumnWidth="120px">
-                        <Columns>
-                            <RadzenDataGridColumn TItem="DiskSpaceInfo" Property="DrivePath" Title="Drive" Width="100px" />
-                            <RadzenDataGridColumn TItem="DiskSpaceInfo" Property="TotalDriveMB" Title="Total (MB)" FormatString="{0:N0}" Width="120px" />
-                            <RadzenDataGridColumn TItem="DiskSpaceInfo" Property="UsedDriveMB" Title="Used (MB)" FormatString="{0:N0}" Width="120px" />
-                            <RadzenDataGridColumn TItem="DiskSpaceInfo" Property="FreeDriveMB" Title="Free (MB)" FormatString="{0:N0}" Width="120px" />
-                            <RadzenDataGridColumn TItem="DiskSpaceInfo" Property="UsedPercent" Title="Used %" Width="150px">
-                                <Template Context="data">
-                                    <RadzenProgressBar Value="@data.UsedPercent" Max="100" Style="height: 20px;" 
-                                                       ProgressBarStyle="@(data.UsedPercent > 90 ? ProgressBarStyle.Danger : data.UsedPercent > 80 ? ProgressBarStyle.Warning : ProgressBarStyle.Success)" 
-                                                       ShowValue="true" />
-                                </Template>
-                            </RadzenDataGridColumn>
-                        </Columns>
-                    </RadzenDataGrid>
+                    <div class="table-responsive">
+                        <QuickGrid Items="@diskSpaceInfo.AsQueryable()" TItem="DiskSpaceInfo" Class="table table-striped table-hover align-middle">
+                            <PropertyColumn Title="Drive" Property="@(disk => disk.DrivePath)" Sortable="true" />
+                            <TemplateColumn Title="Total (MB)">
+                                @context.TotalDriveMB.ToString("N0")
+                            </TemplateColumn>
+                            <TemplateColumn Title="Used (MB)">
+                                @context.UsedDriveMB.ToString("N0")
+                            </TemplateColumn>
+                            <TemplateColumn Title="Free (MB)">
+                                @context.FreeDriveMB.ToString("N0")
+                            </TemplateColumn>
+                            <TemplateColumn Title="Used %">
+                                <RadzenProgressBar Value="@context.UsedPercent" Max="100" Style="height: 20px;" 
+                                                   ProgressBarStyle="@(context.UsedPercent > 90 ? ProgressBarStyle.Danger : context.UsedPercent > 80 ? ProgressBarStyle.Warning : ProgressBarStyle.Success)" 
+                                                   ShowValue="true" />
+                            </TemplateColumn>
+                        </QuickGrid>
+                    </div>
                 </RadzenCard>
             </div>
         </div>

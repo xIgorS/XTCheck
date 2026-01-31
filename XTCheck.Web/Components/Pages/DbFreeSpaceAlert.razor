@@ -1,0 +1,206 @@
+@page "/dbfreespacealert"
+@inject IDbSizeStatsApiClient ApiClient
+@rendermode InteractiveServer
+
+<PageTitle>Database Free Space Alerts</PageTitle>
+
+<h1>Database Free Space Alerts</h1>
+
+@if (isLoading)
+{
+    <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Large">
+        <Template>Loading alerts...</Template>
+    </RadzenProgressBarCircular>
+}
+else if (errorMessage != null)
+{
+    <RadzenAlert AlertStyle="AlertStyle.Danger" Shade="Shade.Light" AllowClose="false">
+        @errorMessage
+    </RadzenAlert>
+    <RadzenButton Text="Retry" Click="LoadAlerts" Icon="refresh" Style="margin-top: 10px;" />
+}
+else
+{
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-md-3">
+            <RadzenButton Text="Reload Alerts" Icon="refresh" Click="LoadAlerts" Disabled="isLoading" />
+        </div>
+    </div>
+
+    @if (!alerts.Any())
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Info" Shade="Shade.Light" AllowClose="false">
+            No alerts returned from the server.
+        </RadzenAlert>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <RadzenCard>
+                    <h4>FileGroup Capacity</h4>
+                    <ApexChart TItem="DbSizeAlertStats"
+                               Options="fileGroupChartOptions"
+                               Height="350">
+                        <ApexPointSeries TItem="DbSizeAlertStats"
+                                         Items="alerts"
+                                         SeriesType="SeriesType.Bar"
+                                         Name="Used (MB)"
+                                         XValue="alert => GetAlertLabel(alert)"
+                                         YValue="alert => alert.UsedDBSpaceMB" />
+                        <ApexPointSeries TItem="DbSizeAlertStats"
+                                         Items="alerts"
+                                         SeriesType="SeriesType.Bar"
+                                         Name="Free (MB)"
+                                         XValue="alert => GetAlertLabel(alert)"
+                                         YValue="alert => alert.FreeDBSpaceMB" />
+                    </ApexChart>
+                </RadzenCard>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 20px;">
+            <div class="col-12">
+                <RadzenCard>
+                    <h4>Alert Details</h4>
+                    <div class="table-responsive">
+                        <QuickGrid Items="@alerts.AsQueryable()" TItem="DbSizeAlertStats" Class="table table-striped table-hover align-middle">
+                            <PropertyColumn Title="Database" Property="@(alert => alert.DatabaseName)" />
+                            <PropertyColumn Title="FileGroup" Property="@(alert => alert.FileGroup)" />
+                            <TemplateColumn Title="Allocated (MB)">
+                                @context.AllocatedDBSpaceMB.ToString("N2")
+                            </TemplateColumn>
+                            <TemplateColumn Title="Used (MB)">
+                                @context.UsedDBSpaceMB.ToString("N2")
+                            </TemplateColumn>
+                            <TemplateColumn Title="Free (MB)">
+                                @context.FreeDBSpaceMB.ToString("N2")
+                            </TemplateColumn>
+                            <TemplateColumn Title="Drive Free (MB)">
+                                @context.FreeDriveMB.ToString("N2")
+                            </TemplateColumn>
+                            <PropertyColumn Title="Partition Size (MB)" Property="@(alert => alert.PartSizeMB)" />
+                            <TemplateColumn Title="Total Free (MB)">
+                                @context.TotalFreeSpaceMB.ToString("N2")
+                            </TemplateColumn>
+                            <TemplateColumn Title="Autogrow">
+                                @if (context.AutogrowEnabled)
+                                {
+                                    <RadzenBadge Text="Enabled" Style="background-color: #4CAF50; color: #fff;" />
+                                }
+                                else
+                                {
+                                    <RadzenBadge Text="Disabled" Style="background-color: #F44336; color: #fff;" />
+                                }
+                            </TemplateColumn>
+                            <TemplateColumn Title="Severity">
+                                <RadzenBadge Text="@NormalizeSeverity(context.AlertLevel)"
+                                             Style="@GetSeverityBadgeStyle(context.AlertLevel)" />
+                            </TemplateColumn>
+                        </QuickGrid>
+                    </div>
+                </RadzenCard>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    private List<DbSizeAlertStats> alerts = new();
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    private readonly Dictionary<string, (string Color, string TextColor)> severityColors = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Critical"] = ("#F44336", "#FFFFFF"),
+        ["Warning"] = ("#FFEB3B", "#000000"),
+        ["OK"] = ("#4CAF50", "#FFFFFF")
+    };
+
+    private readonly ApexChartOptions<DbSizeAlertStats> fileGroupChartOptions = new()
+    {
+        Chart = new Chart { Type = ChartType.Bar, Stacked = true },
+        Colors = new List<string> { "#F44336", "#4CAF50" },
+        PlotOptions = new PlotOptions
+        {
+            Bar = new PlotOptionsBar { Horizontal = true }
+        },
+        Legend = new Legend { Position = ApexCharts.LegendPosition.Top },
+        Xaxis = new XAxis { Title = new AxisTitle { Text = "FileGroup" } },
+        Yaxis = new List<YAxis>
+        {
+            new()
+            {
+                Title = new AxisTitle { Text = "Size (MB)" }
+            }
+        }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAlerts();
+    }
+
+    private async Task LoadAlerts()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var result = await ApiClient.GetDbFreeSpaceAlertsAsync();
+            alerts = result.ToList();
+
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load alerts: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+
+    private string NormalizeSeverity(string? alertLevel)
+    {
+        if (string.IsNullOrWhiteSpace(alertLevel))
+        {
+            return "Unspecified";
+        }
+
+        if (alertLevel.Equals("critical", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Critical";
+        }
+
+        if (alertLevel.Equals("warning", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Warning";
+        }
+
+        if (alertLevel.Equals("ok", StringComparison.OrdinalIgnoreCase))
+        {
+            return "OK";
+        }
+
+        return alertLevel;
+    }
+
+    private string GetAlertLabel(DbSizeAlertStats alert)
+        => $"{alert.DatabaseName} - {alert.FileGroup}";
+
+    private string GetSeverityBadgeStyle(string alertLevel)
+    {
+        var severity = NormalizeSeverity(alertLevel);
+        if (severityColors.TryGetValue(severity, out var colors))
+        {
+            var textColor = colors.TextColor;
+            return $"background-color: {colors.Color}; color: {textColor}; min-width: 90px; display: inline-block; text-align: center;";
+        }
+
+        return "background-color: #607D8B; color: #fff; min-width: 90px; display: inline-block; text-align: center;";
+    }
+
+}

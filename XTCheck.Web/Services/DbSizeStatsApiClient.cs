@@ -95,6 +95,12 @@ public class DbSizeStatsApiClient : IDbSizeStatsApiClient
         return diskInfo;
     }
 
+    public async Task<IEnumerable<DbSizeAlertStats>> GetDbFreeSpaceAlertsAsync()
+    {
+        var result = await _httpClient.GetFromJsonAsync<IEnumerable<DbSizeAlertStats>>("api/DbSizeStats/dbFreeSpaceAlert");
+        return result ?? Enumerable.Empty<DbSizeAlertStats>();
+    }
+
     private static string ExtractDrivePath(string physicalFileName)
     {
         if (string.IsNullOrEmpty(physicalFileName))
