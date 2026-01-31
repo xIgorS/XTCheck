@@ -27,4 +27,18 @@ public class DbSizeStatsController : ControllerBase
             return StatusCode(500, new { Message = "Failed to retrieve database size stats", Error = ex.Message });
         }
     }
+
+    [HttpGet("dbFreeSpaceAlert")]
+    public async Task<IActionResult> GetDbFreeSpaceAlert()
+    {
+        try
+        {
+            var alerts = await _dbSizeStatsService.GetDbSizePlusDiskAsync();
+            return Ok(alerts);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Message = "Failed to retrieve database free space alerts", Error = ex.Message });
+        }
+    }
 }

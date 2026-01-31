@@ -6,6 +6,7 @@ namespace XTCheck.Api.Services;
 public interface IDbSizeStatsService
 {
     Task<IEnumerable<DbSizeStats>> GetDbSizeStatsAsync();
+    Task<IEnumerable<DbSizeAlertStats>> GetDbSizePlusDiskAsync();
 }
 
 public class DbSizeStatsService : IDbSizeStatsService
@@ -20,5 +21,10 @@ public class DbSizeStatsService : IDbSizeStatsService
     public async Task<IEnumerable<DbSizeStats>> GetDbSizeStatsAsync()
     {
         return await _dbSizeStatsRepository.GetDbSizeStatsAsync();
+    }
+
+    public async Task<IEnumerable<DbSizeAlertStats>> GetDbSizePlusDiskAsync()
+    {
+        return await _dbSizeStatsRepository.GetDbSizePlusDiskAsync();
     }
 }

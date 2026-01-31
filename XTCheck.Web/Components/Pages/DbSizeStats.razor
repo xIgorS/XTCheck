@@ -42,7 +42,7 @@ else
     </div>
 
     <div class="row" style="margin-top: 20px;">
-        @* Donut Chart for Selected Database *@
+        @* Donut Chart for Selected Database - ApexCharts *@
         <div class="col-md-6">
             <RadzenCard>
                 <h4>@(selectedDatabase ?? "All Databases") - Space Usage</h4>
@@ -51,19 +51,17 @@ else
                     <div style="text-align: center; margin-bottom: 10px;">
                         <strong>Total Allocated: @selectedDatabaseData.TotalAllocatedMB.ToString("N2") MB</strong>
                     </div>
-                    <RadzenChart Style="height: 350px;">
-                        <RadzenDonutSeries Data="@donutChartData" 
-                                           CategoryProperty="Category" 
-                                           ValueProperty="Value"
-                                           Title="Space (MB)">
-                            <RadzenSeriesDataLabels Visible="true" />
-                        </RadzenDonutSeries>
-                    </RadzenChart>
-                    <div style="text-align: center; margin-top: 10px;">
-                        <span style="color: #4CAF50;">■ Used: @selectedDatabaseData.TotalUsedMB.ToString("N2") MB (@selectedDatabaseData.UsedPercent%)</span>
-                        &nbsp;&nbsp;
-                        <span style="color: #2196F3;">■ Free: @selectedDatabaseData.TotalFreeMB.ToString("N2") MB</span>
-                    </div>
+                    <ApexChart TItem="ChartDataItem"
+                               Title=""
+                               Options="dbSpaceChartOptions"
+                               Height="350">
+                        <ApexPointSeries TItem="ChartDataItem"
+                                         Items="dbSpaceChartData"
+                                         SeriesType="SeriesType.Donut"
+                                         XValue="e => e.Label"
+                                         YValue="e => e.Value"
+                                         OrderBy="e => e.X" />
+                    </ApexChart>
                 }
                 else
                 {
@@ -72,36 +70,32 @@ else
             </RadzenCard>
         </div>
 
-        @* Stacked Bar Chart for All Databases *@
+        @* Stacked Bar Chart for All Databases - ApexCharts *@
         <div class="col-md-6">
             <RadzenCard>
                 <h4>All Databases Comparison</h4>
-                <RadzenChart Style="height: 350px;">
-                    <RadzenCategoryAxis>
-                        <RadzenGridLines Visible="true" />
-                    </RadzenCategoryAxis>
-                    <RadzenValueAxis>
-                        <RadzenGridLines Visible="true" />
-                        <RadzenAxisTitle Text="Size (MB)" />
-                    </RadzenValueAxis>
-                    <RadzenStackedBarSeries Data="@databases" 
-                                             CategoryProperty="DatabaseName" 
-                                             ValueProperty="TotalUsedMB" 
-                                             Title="Used (MB)">
-                        <RadzenSeriesDataLabels Visible="false" />
-                    </RadzenStackedBarSeries>
-                    <RadzenStackedBarSeries Data="@databases" 
-                                             CategoryProperty="DatabaseName" 
-                                             ValueProperty="TotalFreeMB" 
-                                             Title="Free (MB)">
-                        <RadzenSeriesDataLabels Visible="false" />
-                    </RadzenStackedBarSeries>
-                </RadzenChart>
+                <ApexChart TItem="DatabaseSizeAggregate"
+                           Title=""
+                           Options="allDbChartOptions"
+                           Height="350">
+                    <ApexPointSeries TItem="DatabaseSizeAggregate"
+                                     Items="databases"
+                                     SeriesType="SeriesType.Bar"
+                                     Name="Used (MB)"
+                                     XValue="e => e.DatabaseName"
+                                     YValue="e => e.TotalUsedMB" />
+                    <ApexPointSeries TItem="DatabaseSizeAggregate"
+                                     Items="databases"
+                                     SeriesType="SeriesType.Bar"
+                                     Name="Free (MB)"
+                                     XValue="e => e.DatabaseName"
+                                     YValue="e => e.TotalFreeMB" />
+                </ApexChart>
             </RadzenCard>
         </div>
     </div>
 
-    @* Data Grid with Details *@
+    @* Data Grid with Details - Keep Radzen *@
     <div class="row" style="margin-top: 20px;">
         <div class="col-12">
             <RadzenCard>
@@ -135,24 +129,23 @@ else
             <div class="col-md-6">
                 <RadzenCard>
                     <h4>@selectedDatabase - FileGroup Breakdown</h4>
-                    <RadzenChart Style="height: 300px;">
-                        <RadzenColumnSeries Data="@fileGroups" 
-                                            CategoryProperty="FileGroup" 
-                                            ValueProperty="UsedMB" 
-                                            Title="Used (MB)" />
-                        <RadzenColumnSeries Data="@fileGroups" 
-                                            CategoryProperty="FileGroup" 
-                                            ValueProperty="FreeMB" 
-                                            Title="Free (MB)" />
-                        <RadzenCategoryAxis>
-                            <RadzenGridLines Visible="true" />
-                        </RadzenCategoryAxis>
-                        <RadzenValueAxis>
-                            <RadzenGridLines Visible="true" />
-                            <RadzenAxisTitle Text="Size (MB)" />
-                        </RadzenValueAxis>
-                        <RadzenLegend Position="LegendPosition.Bottom" />
-                    </RadzenChart>
+                    <ApexChart TItem="FileGroupAggregate"
+                               Title=""
+                               Options="fileGroupChartOptions"
+                               Height="300">
+                        <ApexPointSeries TItem="FileGroupAggregate"
+                                         Items="fileGroups"
+                                         SeriesType="SeriesType.Bar"
+                                         Name="Used (MB)"
+                                         XValue="e => e.FileGroup"
+                                         YValue="e => e.UsedMB" />
+                        <ApexPointSeries TItem="FileGroupAggregate"
+                                         Items="fileGroups"
+                                         SeriesType="SeriesType.Bar"
+                                         Name="Free (MB)"
+                                         XValue="e => e.FileGroup"
+                                         YValue="e => e.FreeMB" />
+                    </ApexChart>
                 </RadzenCard>
             </div>
             <div class="col-md-6">
@@ -189,14 +182,39 @@ else
             <div class="col-md-6">
                 <RadzenCard>
                     <h4>Disk Space Overview</h4>
-                    <RadzenChart Style="height: 300px;">
-                        <RadzenDonutSeries Data="@diskChartData" 
-                                           CategoryProperty="Category" 
-                                           ValueProperty="Value"
-                                           Title="Disk Space (MB)">
-                            <RadzenSeriesDataLabels Visible="true" />
-                        </RadzenDonutSeries>
-                    </RadzenChart>
+                    @if (diskSpaceInfo.Count == 1)
+                    {
+                        @* RadialBar gauge for single disk *@
+                        <ApexChart TItem="DiskSpaceInfo"
+                                   Title=""
+                                   Options="diskRadialOptions"
+                                   Height="300">
+                            <ApexPointSeries TItem="DiskSpaceInfo"
+                                             Items="diskSpaceInfo"
+                                             SeriesType="SeriesType.RadialBar"
+                                             XValue="e => e.DrivePath"
+                                             YValue="e => (decimal)e.UsedPercent" />
+                        </ApexChart>
+                        <div style="text-align: center;">
+                            <strong>@diskSpaceInfo.First().DrivePath</strong>: 
+                            @diskSpaceInfo.First().FreeDriveMB.ToString("N0") MB free of @diskSpaceInfo.First().TotalDriveMB.ToString("N0") MB
+                        </div>
+                    }
+                    else
+                    {
+                        @* Donut chart for multiple disks *@
+                        <ApexChart TItem="ChartDataItem"
+                                   Title=""
+                                   Options="diskDonutOptions"
+                                   Height="300">
+                            <ApexPointSeries TItem="ChartDataItem"
+                                             Items="diskChartData"
+                                             SeriesType="SeriesType.Donut"
+                                             XValue="e => e.Label"
+                                             YValue="e => e.Value"
+                                             OrderBy="e => e.X" />
+                        </ApexChart>
+                    }
                 </RadzenCard>
             </div>
             <div class="col-md-6">
@@ -231,10 +249,98 @@ else
     private List<DiskSpaceInfo> diskSpaceInfo = new();
     private string? selectedDatabase;
     private DatabaseSizeAggregate? selectedDatabaseData;
-    private List<DonutChartItem> donutChartData = new();
-    private List<DonutChartItem> diskChartData = new();
+    private List<ChartDataItem> dbSpaceChartData = new();
+    private List<ChartDataItem> diskChartData = new();
     private bool isLoading = true;
     private string? errorMessage;
+
+    // ApexCharts Options
+    private ApexChartOptions<ChartDataItem> dbSpaceChartOptions = new()
+    {
+        Chart = new Chart { Type = ChartType.Donut },
+        Colors = new List<string> { "#F44336", "#4CAF50" },
+        Legend = new Legend { Position = ApexCharts.LegendPosition.Bottom },
+        PlotOptions = new PlotOptions
+        {
+            Pie = new PlotOptionsPie
+            {
+                Donut = new PlotOptionsDonut
+                {
+                    Labels = new DonutLabels
+                    {
+                        Show = true,
+                        Total = new DonutLabelTotal
+                        {
+                            Show = true,
+                            Label = "Total",
+                            FontSize = "16px"
+                        }
+                    }
+                }
+            }
+        },
+        DataLabels = new DataLabels
+        {
+            Enabled = true,
+            Formatter = "function(val, opts) { return opts.w.config.series[opts.seriesIndex].toFixed(1) + ' MB'; }"
+        }
+    };
+
+    private ApexChartOptions<DatabaseSizeAggregate> allDbChartOptions = new()
+    {
+        Chart = new Chart { Type = ChartType.Bar, Stacked = true },
+        Colors = new List<string> { "#F44336", "#4CAF50" },
+        PlotOptions = new PlotOptions
+        {
+            Bar = new PlotOptionsBar { Horizontal = true }
+        },
+        Xaxis = new XAxis { Title = new AxisTitle { Text = "Size (MB)" } },
+        Legend = new Legend { Position = ApexCharts.LegendPosition.Top }
+    };
+
+    private ApexChartOptions<FileGroupAggregate> fileGroupChartOptions = new()
+    {
+        Chart = new Chart { Type = ChartType.Bar, Stacked = true },
+        Colors = new List<string> { "#F44336", "#4CAF50" },
+        PlotOptions = new PlotOptions
+        {
+            Bar = new PlotOptionsBar { Horizontal = false }
+        },
+        Xaxis = new XAxis { Title = new AxisTitle { Text = "FileGroup" } },
+        Yaxis = new List<YAxis> { new YAxis { Title = new AxisTitle { Text = "Size (MB)" } } },
+        Legend = new Legend { Position = ApexCharts.LegendPosition.Bottom }
+    };
+
+    private ApexChartOptions<DiskSpaceInfo> diskRadialOptions = new()
+    {
+        Chart = new Chart { Type = ChartType.RadialBar },
+        Colors = new List<string> { "#2196F3" },
+        PlotOptions = new PlotOptions
+        {
+            RadialBar = new PlotOptionsRadialBar
+            {
+                Hollow = new Hollow { Size = "70%" },
+                DataLabels = new RadialBarDataLabels
+                {
+                    Show = true,
+                    Name = new RadialBarDataLabelsName { Show = true, FontSize = "16px" },
+                    Value = new RadialBarDataLabelsValue 
+                    { 
+                        Show = true, 
+                        FontSize = "24px",
+                        Formatter = "function(val) { return val + '% Used'; }"
+                    }
+                }
+            }
+        }
+    };
+
+    private ApexChartOptions<ChartDataItem> diskDonutOptions = new()
+    {
+        Chart = new Chart { Type = ChartType.Donut },
+        Colors = new List<string> { "#F44336", "#4CAF50" },
+        Legend = new Legend { Position = ApexCharts.LegendPosition.Bottom }
+    };
 
     protected override async Task OnInitializedAsync()
     {
@@ -284,10 +390,10 @@ else
         
         if (selectedDatabaseData != null)
         {
-            donutChartData = new List<DonutChartItem>
+            dbSpaceChartData = new List<ChartDataItem>
             {
-                new DonutChartItem { Category = "Used", Value = selectedDatabaseData.TotalUsedMB },
-                new DonutChartItem { Category = "Free", Value = selectedDatabaseData.TotalFreeMB }
+                new ChartDataItem { Label = "Used", Value = selectedDatabaseData.TotalUsedMB },
+                new ChartDataItem { Label = "Free", Value = selectedDatabaseData.TotalFreeMB }
             };
 
             // Load FileGroup stats for selected database
@@ -304,17 +410,18 @@ else
             var totalUsed = diskSpaceInfo.Sum(d => d.UsedDriveMB);
             var totalFree = diskSpaceInfo.Sum(d => d.FreeDriveMB);
             
-            diskChartData = new List<DonutChartItem>
+            diskChartData = new List<ChartDataItem>
             {
-                new DonutChartItem { Category = "Used", Value = totalUsed },
-                new DonutChartItem { Category = "Free", Value = totalFree }
+                new ChartDataItem { Label = "Used", Value = totalUsed },
+                new ChartDataItem { Label = "Free", Value = totalFree }
             };
         }
     }
 
-    private class DonutChartItem
+    // Chart data model for ApexCharts
+    public class ChartDataItem
     {
-        public string Category { get; set; } = string.Empty;
+        public string Label { get; set; } = string.Empty;
         public decimal Value { get; set; }
     }
 }
