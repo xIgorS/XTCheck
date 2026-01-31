@@ -4,7 +4,10 @@
 
 <PageTitle>Database Free Space Alerts</PageTitle>
 
-<h1>Database Free Space Alerts</h1>
+<div class="page-header">
+    <h1 class="page-title">Database Free Space Alerts</h1>
+    <RadzenButton Text="Reload Alerts" Icon="refresh" Click="LoadAlerts" Disabled="isLoading" />
+</div>
 
 @if (isLoading)
 {
@@ -17,16 +20,10 @@ else if (errorMessage != null)
     <RadzenAlert AlertStyle="AlertStyle.Danger" Shade="Shade.Light" AllowClose="false">
         @errorMessage
     </RadzenAlert>
-    <RadzenButton Text="Retry" Click="LoadAlerts" Icon="refresh" Style="margin-top: 10px;" />
+    <RadzenButton Text="Retry" Click="LoadAlerts" Icon="refresh" Class="mt-2" />
 }
 else
 {
-    <div class="row" style="margin-bottom: 20px;">
-        <div class="col-md-3">
-            <RadzenButton Text="Reload Alerts" Icon="refresh" Click="LoadAlerts" Disabled="isLoading" />
-        </div>
-    </div>
-
     @if (!alerts.Any())
     {
         <RadzenAlert AlertStyle="AlertStyle.Info" Shade="Shade.Light" AllowClose="false">
@@ -35,10 +32,10 @@ else
     }
     else
     {
-        <div class="row">
+        <div class="row section">
             <div class="col-12">
-                <RadzenCard>
-                    <h4>FileGroup Capacity</h4>
+                <RadzenCard Class="card-surface">
+                    <h4 class="section-title">FileGroup Capacity</h4>
                     <ApexChart TItem="DbSizeAlertStats"
                                Options="fileGroupChartOptions"
                                Height="350">
@@ -59,43 +56,42 @@ else
             </div>
         </div>
 
-        <div class="row" style="margin-top: 20px;">
+        <div class="row section">
             <div class="col-12">
-                <RadzenCard>
-                    <h4>Alert Details</h4>
+                <RadzenCard Class="card-surface">
+                    <h4 class="section-title">Alert Details</h4>
+                    <p class="text-muted mb-2">Showing alerts for all databases and filegroups with potential space issues.</p>
                     <div class="table-responsive">
-                        <QuickGrid Items="@alerts.AsQueryable()" TItem="DbSizeAlertStats" Class="table table-striped table-hover align-middle">
-                            <PropertyColumn Title="Database" Property="@(alert => alert.DatabaseName)" />
-                            <PropertyColumn Title="FileGroup" Property="@(alert => alert.FileGroup)" />
-                            <TemplateColumn Title="Allocated (MB)">
-                                @context.AllocatedDBSpaceMB.ToString("N2")
+                        <QuickGrid Items="@alerts.AsQueryable()" TItem="DbSizeAlertStats" Class="table table-striped table-hover align-middle table-sm table-compact">
+                            <PropertyColumn Title="FileGroup" Property="@(alert => alert.FileGroup)" Sortable="true" IsDefaultSortColumn="true" />
+                            <TemplateColumn Title="Allocated (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.AllocatedDBSpaceMB))">
+                                <span class="text-end d-block">@context.AllocatedDBSpaceMB.ToString("N2")</span>
                             </TemplateColumn>
-                            <TemplateColumn Title="Used (MB)">
-                                @context.UsedDBSpaceMB.ToString("N2")
+                            <TemplateColumn Title="Used (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.UsedDBSpaceMB))">
+                                <span class="text-end d-block">@context.UsedDBSpaceMB.ToString("N2")</span>
                             </TemplateColumn>
-                            <TemplateColumn Title="Free (MB)">
-                                @context.FreeDBSpaceMB.ToString("N2")
+                            <TemplateColumn Title="Free (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.FreeDBSpaceMB))">
+                                <span class="text-end d-block">@context.FreeDBSpaceMB.ToString("N2")</span>
                             </TemplateColumn>
-                            <TemplateColumn Title="Drive Free (MB)">
-                                @context.FreeDriveMB.ToString("N2")
+                            <TemplateColumn Title="Drive Free (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.FreeDriveMB))">
+                                <span class="text-end d-block">@context.FreeDriveMB.ToString("N2")</span>
                             </TemplateColumn>
-                            <PropertyColumn Title="Partition Size (MB)" Property="@(alert => alert.PartSizeMB)" />
-                            <TemplateColumn Title="Total Free (MB)">
-                                @context.TotalFreeSpaceMB.ToString("N2")
+                            <PropertyColumn Title="Partition Size (MB)" Property="@(alert => alert.PartSizeMB)" Sortable="true" />
+                            <TemplateColumn Title="Total Free (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.TotalFreeSpaceMB))">
+                                <span class="text-end d-block">@context.TotalFreeSpaceMB.ToString("N2")</span>
                             </TemplateColumn>
-                            <TemplateColumn Title="Autogrow">
+                            <TemplateColumn Title="Autogrow" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.AutogrowEnabled))">
                                 @if (context.AutogrowEnabled)
                                 {
-                                    <RadzenBadge Text="Enabled" Style="background-color: #4CAF50; color: #fff;" />
+                                    <RadzenBadge Text="Enabled" Class="badge-pill status-ok" />
                                 }
                                 else
                                 {
-                                    <RadzenBadge Text="Disabled" Style="background-color: #F44336; color: #fff;" />
+                                    <RadzenBadge Text="Disabled" Class="badge-pill status-critical" />
                                 }
                             </TemplateColumn>
-                            <TemplateColumn Title="Severity">
-                                <RadzenBadge Text="@NormalizeSeverity(context.AlertLevel)"
-                                             Style="@GetSeverityBadgeStyle(context.AlertLevel)" />
+                            <TemplateColumn Title="Severity" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.AlertLevel))">
+                                <span class="@GetSeverityCellClass(context.AlertLevel)">@NormalizeSeverity(context.AlertLevel)</span>
                             </TemplateColumn>
                         </QuickGrid>
                     </div>
@@ -110,12 +106,6 @@ else
     private bool isLoading = true;
     private string? errorMessage;
 
-    private readonly Dictionary<string, (string Color, string TextColor)> severityColors = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["Critical"] = ("#F44336", "#FFFFFF"),
-        ["Warning"] = ("#FFEB3B", "#000000"),
-        ["OK"] = ("#4CAF50", "#FFFFFF")
-    };
 
     private readonly ApexChartOptions<DbSizeAlertStats> fileGroupChartOptions = new()
     {
@@ -191,16 +181,28 @@ else
     private string GetAlertLabel(DbSizeAlertStats alert)
         => $"{alert.DatabaseName} - {alert.FileGroup}";
 
-    private string GetSeverityBadgeStyle(string alertLevel)
+    private string GetSeverityBadgeClass(string alertLevel)
     {
         var severity = NormalizeSeverity(alertLevel);
-        if (severityColors.TryGetValue(severity, out var colors))
+        return severity switch
         {
-            var textColor = colors.TextColor;
-            return $"background-color: {colors.Color}; color: {textColor}; min-width: 90px; display: inline-block; text-align: center;";
-        }
+            "Critical" => "badge-pill status-critical",
+            "Warning" => "badge-pill status-warning",
+            "OK" => "badge-pill status-ok",
+            _ => "badge-pill status-neutral"
+        };
+    }
 
-        return "background-color: #607D8B; color: #fff; min-width: 90px; display: inline-block; text-align: center;";
+    private string GetSeverityCellClass(string alertLevel)
+    {
+        var severity = NormalizeSeverity(alertLevel);
+        return severity switch
+        {
+            "Critical" => "severity-cell severity-critical",
+            "Warning" => "severity-cell severity-warning",
+            "OK" => "severity-cell severity-ok",
+            _ => "severity-cell"
+        };
     }
 
 }

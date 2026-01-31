@@ -1,19 +1,27 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="page">
-    <div class="sidebar">
+    <aside class="sidebar">
         <NavMenu />
-    </div>
+    </aside>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <div class="top-bar-content">
+                <span class="breadcrumb-text">Dashboard</span>
+                <div class="top-bar-actions">
+                    <a href="https://github.com/xIgorS/XTCheck" target="_blank" class="top-bar-link">
+                        <span class="icon-github"></span>
+                        GitHub
+                    </a>
+                </div>
+            </div>
+        </header>
 
-        <article class="content px-4">
+        <main class="content px-4">
             @Body
-        </article>
-    </main>
+        </main>
+    </div>
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>
