@@ -177,7 +177,7 @@ else
                  .ToDictionary(g => g.Key, g => g.ToList());
 
     private int GetChartHeight(int itemCount)
-        => Math.Max(200, itemCount * 50 + 100);
+        => Math.Max(100, itemCount * 25 + 50);
 
     private ApexChartOptions<DbSizeAlertStats> GetChartOptions(string dbName)
     {
@@ -192,7 +192,6 @@ else
             Legend = new Legend { Position = ApexCharts.LegendPosition.Top },
             Xaxis = new XAxis 
             { 
-                Title = new AxisTitle { Text = "FileGroup" },
                 Labels = new XAxisLabels
                 {
                     Style = new AxisLabelStyle
