@@ -32,77 +32,83 @@ else
     }
     else
     {
-        @* Database Name Header *@
-        <div class="database-header mb-3">
-            <h2 class="database-name">@GetDatabaseName()</h2>
-        </div>
-
-        <div class="row section">
-            <div class="col-12">
-                <RadzenCard Class="card-surface">
-                    <h4 class="section-title">FileGroup Capacity</h4>
-                    <ApexChart TItem="DbSizeAlertStats"
-                               Options="fileGroupChartOptions"
-                               Height="350">
-                        <ApexPointSeries TItem="DbSizeAlertStats"
-                                         Items="alerts"
-                                         SeriesType="SeriesType.Bar"
-                                         Name="Used (MB)"
-                                         XValue="alert => GetAlertLabel(alert)"
-                                         YValue="alert => alert.UsedDBSpaceMB" />
-                        <ApexPointSeries TItem="DbSizeAlertStats"
-                                         Items="alerts"
-                                         SeriesType="SeriesType.Bar"
-                                         Name="Free (MB)"
-                                         XValue="alert => GetAlertLabel(alert)"
-                                         YValue="alert => alert.FreeDBSpaceMB" />
-                    </ApexChart>
-                </RadzenCard>
+        @foreach (var dbGroup in GetAlertsByDatabase())
+        {
+            var dbName = dbGroup.Key;
+            var dbAlerts = dbGroup.Value;
+            
+            @* Database Name Header *@
+            <div class="database-header mb-3" @key="@($"header-{dbName}")">
+                <h2 class="database-name">@dbName</h2>
             </div>
-        </div>
 
-        <div class="row section">
-            <div class="col-12">
-                <RadzenCard Class="card-surface">
-                    <h4 class="section-title">Alert Details</h4>
-                    <p class="text-muted mb-2">Showing alerts for filegroups with potential space issues.</p>
-                    <div class="table-responsive">
-                        <QuickGrid Items="@alerts.AsQueryable()" TItem="DbSizeAlertStats" Class="table table-striped table-hover align-middle table-sm table-compact">
-                            <PropertyColumn Title="FileGroup" Property="@(alert => alert.FileGroup)" Sortable="true" IsDefaultSortColumn="true" />
-                            <TemplateColumn Title="Allocated (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.AllocatedDBSpaceMB))">
-                                <span class="text-end d-block">@context.AllocatedDBSpaceMB.ToString("N0")</span>
-                            </TemplateColumn>
-                            <TemplateColumn Title="Used (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.UsedDBSpaceMB))">
-                                <span class="text-end d-block">@context.UsedDBSpaceMB.ToString("N0")</span>
-                            </TemplateColumn>
-                            <TemplateColumn Title="Free (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.FreeDBSpaceMB))">
-                                <span class="text-end d-block">@context.FreeDBSpaceMB.ToString("N0")</span>
-                            </TemplateColumn>
-                            <TemplateColumn Title="Drive Free (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.FreeDriveMB))">
-                                <span class="text-end d-block">@context.FreeDriveMB.ToString("N0")</span>
-                            </TemplateColumn>
-                            <PropertyColumn Title="Partition Size (MB)" Property="@(alert => alert.PartSizeMB)" Sortable="true" />
-                            <TemplateColumn Title="Total Free (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.TotalFreeSpaceMB))">
-                                <span class="text-end d-block">@context.TotalFreeSpaceMB.ToString("N0")</span>
-                            </TemplateColumn>
-                            <TemplateColumn Title="Autogrow" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.AutogrowEnabled))">
-                                @if (context.AutogrowEnabled)
-                                {
-                                    <RadzenBadge Text="Enabled" Class="badge-pill status-ok" />
-                                }
-                                else
-                                {
-                                    <RadzenBadge Text="Disabled" Class="badge-pill status-critical" />
-                                }
-                            </TemplateColumn>
-                            <TemplateColumn Title="Severity" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.AlertLevel))">
-                                <span class="@GetSeverityCellClass(context.AlertLevel)">@NormalizeSeverity(context.AlertLevel)</span>
-                            </TemplateColumn>
-                        </QuickGrid>
-                    </div>
-                </RadzenCard>
+            <div class="row section" @key="@($"chart-section-{dbName}")">
+                <div class="col-12">
+                    <RadzenCard Class="card-surface">
+                        <h4 class="section-title">FileGroup Capacity</h4>
+                        <ApexChart @key="@($"chart-{dbName}")"
+                                   TItem="DbSizeAlertStats"
+                                   Options="@GetChartOptions(dbName)"
+                                   Height="@GetChartHeight(dbAlerts.Count)">
+                            <ApexPointSeries TItem="DbSizeAlertStats"
+                                             Items="dbAlerts"
+                                             SeriesType="SeriesType.Bar"
+                                             Name="Used (MB)"
+                                             XValue="alert => GetAlertLabel(alert)"
+                                             YValue="alert => alert.UsedDBSpaceMB" />
+                            <ApexPointSeries TItem="DbSizeAlertStats"
+                                             Items="dbAlerts"
+                                             SeriesType="SeriesType.Bar"
+                                             Name="Free (MB)"
+                                             XValue="alert => GetAlertLabel(alert)"
+                                             YValue="alert => alert.FreeDBSpaceMB" />
+                        </ApexChart>
+                    </RadzenCard>
+                </div>
             </div>
-        </div>
+
+            <div class="row section mb-5" @key="@($"grid-section-{dbName}")">
+                <div class="col-12">
+                    <RadzenCard Class="card-surface">
+                        <h4 class="section-title">Alert Details</h4>
+                        <div class="table-responsive">
+                            <QuickGrid Items="@dbAlerts.AsQueryable()" TItem="DbSizeAlertStats" Class="table table-striped table-hover align-middle table-sm table-compact">
+                                <PropertyColumn Title="FileGroup" Property="@(alert => alert.FileGroup)" Sortable="true" IsDefaultSortColumn="true" />
+                                <TemplateColumn Title="Allocated (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.AllocatedDBSpaceMB))">
+                                    <span class="text-end d-block">@context.AllocatedDBSpaceMB.ToString("N0")</span>
+                                </TemplateColumn>
+                                <TemplateColumn Title="Used (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.UsedDBSpaceMB))">
+                                    <span class="text-end d-block">@context.UsedDBSpaceMB.ToString("N0")</span>
+                                </TemplateColumn>
+                                <TemplateColumn Title="Free (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.FreeDBSpaceMB))">
+                                    <span class="text-end d-block">@context.FreeDBSpaceMB.ToString("N0")</span>
+                                </TemplateColumn>
+                                <TemplateColumn Title="Drive Free (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.FreeDriveMB))">
+                                    <span class="text-end d-block">@context.FreeDriveMB.ToString("N0")</span>
+                                </TemplateColumn>
+                                <PropertyColumn Title="Partition Size (MB)" Property="@(alert => alert.PartSizeMB)" Sortable="true" />
+                                <TemplateColumn Title="Total Free (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.TotalFreeSpaceMB))">
+                                    <span class="text-end d-block">@context.TotalFreeSpaceMB.ToString("N0")</span>
+                                </TemplateColumn>
+                                <TemplateColumn Title="Autogrow" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.AutogrowEnabled))">
+                                    @if (context.AutogrowEnabled)
+                                    {
+                                        <RadzenBadge Text="Enabled" Class="badge-pill status-ok" />
+                                    }
+                                    else
+                                    {
+                                        <RadzenBadge Text="Disabled" Class="badge-pill status-critical" />
+                                    }
+                                </TemplateColumn>
+                                <TemplateColumn Title="Severity" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.AlertLevel))">
+                                    <span class="@GetSeverityCellClass(context.AlertLevel)">@NormalizeSeverity(context.AlertLevel)</span>
+                                </TemplateColumn>
+                            </QuickGrid>
+                        </div>
+                    </RadzenCard>
+                </div>
+            </div>
+        }
     }
 }
 
@@ -110,45 +116,6 @@ else
     private List<DbSizeAlertStats> alerts = new();
     private bool isLoading = true;
     private string? errorMessage;
-
-
-    private readonly ApexChartOptions<DbSizeAlertStats> fileGroupChartOptions = new()
-    {
-        Chart = new Chart { Type = ChartType.Bar, Stacked = true },
-        Colors = new List<string> { "#F44336", "#4CAF50" },
-        PlotOptions = new PlotOptions
-        {
-            Bar = new PlotOptionsBar { Horizontal = true, BarHeight = "70%" }
-        },
-        Legend = new Legend { Position = ApexCharts.LegendPosition.Top },
-        Xaxis = new XAxis 
-        { 
-            Title = new AxisTitle { Text = "FileGroup" },
-            Labels = new XAxisLabels
-            {
-                Style = new AxisLabelStyle
-                {
-                    FontSize = "12px",
-                    FontWeight = "500"
-                }
-            }
-        },
-        Yaxis = new List<YAxis>
-        {
-            new()
-            {
-                Title = new AxisTitle { Text = "Size (MB)" },
-                Labels = new YAxisLabels
-                {
-                    Style = new AxisLabelStyle
-                    {
-                        FontSize = "13px",
-                        FontWeight = "600"
-                    }
-                }
-            }
-        }
-    };
 
     protected override async Task OnInitializedAsync()
     {
@@ -205,8 +172,53 @@ else
     private string GetAlertLabel(DbSizeAlertStats alert)
         => alert.FileGroup;
 
-    private string GetDatabaseName()
-        => alerts.FirstOrDefault()?.DatabaseName ?? "Unknown Database";
+    private Dictionary<string, List<DbSizeAlertStats>> GetAlertsByDatabase()
+        => alerts.GroupBy(a => a.DatabaseName ?? "Unknown")
+                 .ToDictionary(g => g.Key, g => g.ToList());
+
+    private int GetChartHeight(int itemCount)
+        => Math.Max(200, itemCount * 50 + 100);
+
+    private ApexChartOptions<DbSizeAlertStats> GetChartOptions(string dbName)
+    {
+        return new ApexChartOptions<DbSizeAlertStats>
+        {
+            Chart = new Chart { Type = ChartType.Bar, Stacked = true, Id = $"chart-{dbName}" },
+            Colors = new List<string> { "#F44336", "#4CAF50" },
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar { Horizontal = true, BarHeight = "70%" }
+            },
+            Legend = new Legend { Position = ApexCharts.LegendPosition.Top },
+            Xaxis = new XAxis 
+            { 
+                Title = new AxisTitle { Text = "FileGroup" },
+                Labels = new XAxisLabels
+                {
+                    Style = new AxisLabelStyle
+                    {
+                        FontSize = "12px",
+                        FontWeight = "500"
+                    }
+                }
+            },
+            Yaxis = new List<YAxis>
+            {
+                new()
+                {
+                    Title = new AxisTitle { Text = "Size (MB)" },
+                    Labels = new YAxisLabels
+                    {
+                        Style = new AxisLabelStyle
+                        {
+                            FontSize = "13px",
+                            FontWeight = "600"
+                        }
+                    }
+                }
+            }
+        };
+    }
 
     private string GetSeverityBadgeClass(string alertLevel)
     {
