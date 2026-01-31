@@ -32,6 +32,11 @@ else
     }
     else
     {
+        @* Database Name Header *@
+        <div class="database-header mb-3">
+            <h2 class="database-name">@GetDatabaseName()</h2>
+        </div>
+
         <div class="row section">
             <div class="col-12">
                 <RadzenCard Class="card-surface">
@@ -60,25 +65,25 @@ else
             <div class="col-12">
                 <RadzenCard Class="card-surface">
                     <h4 class="section-title">Alert Details</h4>
-                    <p class="text-muted mb-2">Showing alerts for all databases and filegroups with potential space issues.</p>
+                    <p class="text-muted mb-2">Showing alerts for filegroups with potential space issues.</p>
                     <div class="table-responsive">
                         <QuickGrid Items="@alerts.AsQueryable()" TItem="DbSizeAlertStats" Class="table table-striped table-hover align-middle table-sm table-compact">
                             <PropertyColumn Title="FileGroup" Property="@(alert => alert.FileGroup)" Sortable="true" IsDefaultSortColumn="true" />
                             <TemplateColumn Title="Allocated (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.AllocatedDBSpaceMB))">
-                                <span class="text-end d-block">@context.AllocatedDBSpaceMB.ToString("N2")</span>
+                                <span class="text-end d-block">@context.AllocatedDBSpaceMB.ToString("N0")</span>
                             </TemplateColumn>
                             <TemplateColumn Title="Used (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.UsedDBSpaceMB))">
-                                <span class="text-end d-block">@context.UsedDBSpaceMB.ToString("N2")</span>
+                                <span class="text-end d-block">@context.UsedDBSpaceMB.ToString("N0")</span>
                             </TemplateColumn>
                             <TemplateColumn Title="Free (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.FreeDBSpaceMB))">
-                                <span class="text-end d-block">@context.FreeDBSpaceMB.ToString("N2")</span>
+                                <span class="text-end d-block">@context.FreeDBSpaceMB.ToString("N0")</span>
                             </TemplateColumn>
                             <TemplateColumn Title="Drive Free (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.FreeDriveMB))">
-                                <span class="text-end d-block">@context.FreeDriveMB.ToString("N2")</span>
+                                <span class="text-end d-block">@context.FreeDriveMB.ToString("N0")</span>
                             </TemplateColumn>
                             <PropertyColumn Title="Partition Size (MB)" Property="@(alert => alert.PartSizeMB)" Sortable="true" />
                             <TemplateColumn Title="Total Free (MB)" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.TotalFreeSpaceMB))">
-                                <span class="text-end d-block">@context.TotalFreeSpaceMB.ToString("N2")</span>
+                                <span class="text-end d-block">@context.TotalFreeSpaceMB.ToString("N0")</span>
                             </TemplateColumn>
                             <TemplateColumn Title="Autogrow" SortBy="@(GridSort<DbSizeAlertStats>.ByAscending(x => x.AutogrowEnabled))">
                                 @if (context.AutogrowEnabled)
@@ -113,15 +118,34 @@ else
         Colors = new List<string> { "#F44336", "#4CAF50" },
         PlotOptions = new PlotOptions
         {
-            Bar = new PlotOptionsBar { Horizontal = true }
+            Bar = new PlotOptionsBar { Horizontal = true, BarHeight = "70%" }
         },
         Legend = new Legend { Position = ApexCharts.LegendPosition.Top },
-        Xaxis = new XAxis { Title = new AxisTitle { Text = "FileGroup" } },
+        Xaxis = new XAxis 
+        { 
+            Title = new AxisTitle { Text = "FileGroup" },
+            Labels = new XAxisLabels
+            {
+                Style = new AxisLabelStyle
+                {
+                    FontSize = "12px",
+                    FontWeight = "500"
+                }
+            }
+        },
         Yaxis = new List<YAxis>
         {
             new()
             {
-                Title = new AxisTitle { Text = "Size (MB)" }
+                Title = new AxisTitle { Text = "Size (MB)" },
+                Labels = new YAxisLabels
+                {
+                    Style = new AxisLabelStyle
+                    {
+                        FontSize = "13px",
+                        FontWeight = "600"
+                    }
+                }
             }
         }
     };
@@ -179,7 +203,10 @@ else
     }
 
     private string GetAlertLabel(DbSizeAlertStats alert)
-        => $"{alert.DatabaseName} - {alert.FileGroup}";
+        => alert.FileGroup;
+
+    private string GetDatabaseName()
+        => alerts.FirstOrDefault()?.DatabaseName ?? "Unknown Database";
 
     private string GetSeverityBadgeClass(string alertLevel)
     {

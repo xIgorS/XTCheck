@@ -69,6 +69,22 @@ a, .btn-link {
     font-weight: 600;
 }
 
+/* Database Header */
+.database-header {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    padding: 1rem 1.5rem;
+    border-radius: var(--xtc-radius);
+    box-shadow: var(--xtc-shadow);
+}
+
+.database-name {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.025em;
+}
+
 .card-surface {
     background: var(--xtc-surface);
     border: 1px solid var(--xtc-border);

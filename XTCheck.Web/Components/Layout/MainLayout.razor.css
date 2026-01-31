@@ -23,29 +23,31 @@
 }
 
 .top-bar {
-    background: #fff;
-    border-bottom: 1px solid #e5e7eb;
+    background: #3b82f6;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     padding: 0 1.5rem;
     height: 60px;
     display: flex;
     align-items: center;
+    justify-content: center;
     position: sticky;
     top: 0;
     z-index: 50;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
 .top-bar-content {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     width: 100%;
 }
 
 .breadcrumb-text {
-    font-size: 0.875rem;
-    color: #6b7280;
-    font-weight: 500;
+    font-size: 1rem;
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.025em;
 }
 
 .top-bar-actions {

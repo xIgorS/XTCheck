@@ -49,7 +49,7 @@ else
                 @if (selectedDatabaseData != null)
                 {
                     <div class="text-center mb-2">
-                        <strong>Total Allocated: @selectedDatabaseData.TotalAllocatedMB.ToString("N2") MB</strong>
+                        <strong>Total Allocated: @selectedDatabaseData.TotalAllocatedMB.ToString("N0") MB</strong>
                     </div>
                     <ApexChart TItem="ChartDataItem"
                                Title=""
@@ -105,13 +105,13 @@ else
                         <PropertyColumn Title="Instance" Property="@(db => db.InstanceName)" Sortable="true" />
                         <PropertyColumn Title="Database" Property="@(db => db.DatabaseName)" Sortable="true" IsDefaultSortColumn="true" />
                         <TemplateColumn Title="Allocated (MB)" SortBy="@(GridSort<DatabaseSizeAggregate>.ByAscending(x => x.TotalAllocatedMB))">
-                            <span class="text-end d-block">@context.TotalAllocatedMB.ToString("N2")</span>
+                            <span class="text-end d-block">@context.TotalAllocatedMB.ToString("N0")</span>
                         </TemplateColumn>
                         <TemplateColumn Title="Used (MB)" SortBy="@(GridSort<DatabaseSizeAggregate>.ByAscending(x => x.TotalUsedMB))">
-                            <span class="text-end d-block">@context.TotalUsedMB.ToString("N2")</span>
+                            <span class="text-end d-block">@context.TotalUsedMB.ToString("N0")</span>
                         </TemplateColumn>
                         <TemplateColumn Title="Free (MB)" SortBy="@(GridSort<DatabaseSizeAggregate>.ByAscending(x => x.TotalFreeMB))">
-                            <span class="text-end d-block">@context.TotalFreeMB.ToString("N2")</span>
+                            <span class="text-end d-block">@context.TotalFreeMB.ToString("N0")</span>
                         </TemplateColumn>
                         <TemplateColumn Title="Used %" SortBy="@(GridSort<DatabaseSizeAggregate>.ByAscending(x => x.UsedPercent))">
                             <RadzenProgressBar Value="@context.UsedPercent" Max="100" Style="height: 20px;" 
@@ -160,13 +160,13 @@ else
                             <PropertyColumn Title="Type" Property="@(fg => fg.FileType)" Sortable="true" />
                             <PropertyColumn Title="Files" Property="@(fg => fg.FileCount)" Sortable="true" />
                             <TemplateColumn Title="Allocated" SortBy="@(GridSort<FileGroupAggregate>.ByAscending(x => x.AllocatedMB))">
-                                <span class="text-end d-block">@context.AllocatedMB.ToString("N2")</span>
+                                <span class="text-end d-block">@context.AllocatedMB.ToString("N0")</span>
                             </TemplateColumn>
                             <TemplateColumn Title="Used" SortBy="@(GridSort<FileGroupAggregate>.ByAscending(x => x.UsedMB))">
-                                <span class="text-end d-block">@context.UsedMB.ToString("N2")</span>
+                                <span class="text-end d-block">@context.UsedMB.ToString("N0")</span>
                             </TemplateColumn>
                             <TemplateColumn Title="Free" SortBy="@(GridSort<FileGroupAggregate>.ByAscending(x => x.FreeMB))">
-                                <span class="text-end d-block">@context.FreeMB.ToString("N2")</span>
+                                <span class="text-end d-block">@context.FreeMB.ToString("N0")</span>
                             </TemplateColumn>
                             <TemplateColumn Title="Used %" SortBy="@(GridSort<FileGroupAggregate>.ByAscending(x => x.UsedPercent))">
                                 <RadzenProgressBar Value="@context.UsedPercent" Max="100" Style="height: 18px;" 
@@ -183,45 +183,7 @@ else
     @if (diskSpaceInfo.Any())
     {
         <div class="row section g-3">
-            <div class="col-md-6">
-                <RadzenCard Class="card-surface">
-                    <h4 class="section-title">Disk Space Overview</h4>
-                    @if (diskSpaceInfo.Count == 1)
-                    {
-                        @* RadialBar gauge for single disk *@
-                        <ApexChart TItem="DiskSpaceInfo"
-                                   Title=""
-                                   Options="diskRadialOptions"
-                                   Height="300">
-                            <ApexPointSeries TItem="DiskSpaceInfo"
-                                             Items="diskSpaceInfo"
-                                             SeriesType="SeriesType.RadialBar"
-                                             XValue="e => e.DrivePath"
-                                             YValue="e => (decimal)e.UsedPercent" />
-                        </ApexChart>
-                        <div class="text-center">
-                            <strong>@diskSpaceInfo.First().DrivePath</strong>: 
-                            @diskSpaceInfo.First().FreeDriveMB.ToString("N0") MB free of @diskSpaceInfo.First().TotalDriveMB.ToString("N0") MB
-                        </div>
-                    }
-                    else
-                    {
-                        @* Donut chart for multiple disks *@
-                        <ApexChart TItem="ChartDataItem"
-                                   Title=""
-                                   Options="diskDonutOptions"
-                                   Height="300">
-                            <ApexPointSeries TItem="ChartDataItem"
-                                             Items="diskChartData"
-                                             SeriesType="SeriesType.Donut"
-                                             XValue="e => e.Label"
-                                             YValue="e => e.Value"
-                                             OrderBy="e => e.X" />
-                        </ApexChart>
-                    }
-                </RadzenCard>
-            </div>
-            <div class="col-md-6">
+            <div class="col-12">
                 <RadzenCard Class="card-surface">
                     <h4 class="section-title">Disk Space Details</h4>
                     <div class="table-responsive">
@@ -264,7 +226,7 @@ else
     private ApexChartOptions<ChartDataItem> dbSpaceChartOptions = new()
     {
         Chart = new Chart { Type = ChartType.Donut },
-        Colors = new List<string> { "#F44336", "#4CAF50" },
+        Colors = new List<string> { "#4CAF50", "#F44336" },
         Legend = new Legend { Position = ApexCharts.LegendPosition.Bottom },
         PlotOptions = new PlotOptions
         {
