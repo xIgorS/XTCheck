@@ -4,12 +4,12 @@ public class DbSizeAlertStats
 {
     public string DatabaseName { get; set; } = string.Empty;
     public string FileGroup { get; set; } = string.Empty;
-    public int AllocatedDBSpaceMB { get; set; }
-    public decimal UsedDBSpaceMB { get; set; }
-    public decimal FreeDBSpaceMB { get; set; }
+    public long AllocatedDBSpaceMB { get; set; }
+    public long UsedDBSpaceMB { get; set; }
+    public long FreeDBSpaceMB { get; set; }
     public bool AutogrowEnabled { get; set; }
-    public decimal FreeDriveMB { get; set; }
-    public int PartSizeMB { get; set; }
-    public decimal TotalFreeSpaceMB { get; set; }
+    public long FreeDriveMB { get; set; }
+    public long PartSizeMB { get; set; }
+    public long TotalFreeSpaceMB { get; set; }
     public string AlertLevel { get; set; } = string.Empty;
 }

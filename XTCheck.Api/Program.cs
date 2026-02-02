@@ -34,7 +34,8 @@ builder.Services.AddCors(options =>
 // Allowed Windows users (case-insensitive comparison)
 var allowedUsers = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 {
-    @"domain1\user1",
+    @"gaia\680098",
+    @"gaia/680098",
     @"domain2\user2"
 };
 
@@ -54,7 +55,12 @@ if (isWindows)
             policy.RequireAssertion(context =>
             {
                 var userName = context.User.Identity?.Name;
-                return !string.IsNullOrEmpty(userName) && allowedUsers.Contains(userName);
+                var isAllowed = !string.IsNullOrEmpty(userName) && allowedUsers.Contains(userName);
+                
+                // Log authentication attempts
+                Console.WriteLine($"[AUTH] User: '{userName}' - Allowed: {isAllowed}");
+                
+                return isAllowed;
             });
         });
 

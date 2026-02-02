@@ -103,13 +103,13 @@ public class DbSizeStatsRepository : IDbSizeStatsRepository
             {
                 DatabaseName = reader.GetString(databaseNameOrdinal),
                 FileGroup = reader.GetString(fileGroupOrdinal),
-                AllocatedDBSpaceMB = reader.GetInt32(allocatedDBSpaceMBOrdinal),
-                UsedDBSpaceMB = reader.GetDecimal(usedDBSpaceMBOrdinal),
-                FreeDBSpaceMB = reader.GetDecimal(freeDBSpaceMBOrdinal),
+                AllocatedDBSpaceMB = reader.GetInt64(allocatedDBSpaceMBOrdinal),
+                UsedDBSpaceMB = reader.GetInt64(usedDBSpaceMBOrdinal),
+                FreeDBSpaceMB = reader.GetInt64(freeDBSpaceMBOrdinal),
                 AutogrowEnabled = reader.GetInt32(autogrowEnabledOrdinal) == 1,
-                FreeDriveMB = reader.GetDecimal(freeDriveMBOrdinal),
-                PartSizeMB = reader.GetInt32(partSizeMBOrdinal),
-                TotalFreeSpaceMB = reader.GetDecimal(totalFreeSpaceMBOrdinal),
+                FreeDriveMB = reader.GetInt64(freeDriveMBOrdinal),
+                PartSizeMB = reader.GetInt64(partSizeMBOrdinal),
+                TotalFreeSpaceMB = reader.GetInt64(totalFreeSpaceMBOrdinal),
                 AlertLevel = reader.GetString(alertLevelOrdinal)
             });
         }
