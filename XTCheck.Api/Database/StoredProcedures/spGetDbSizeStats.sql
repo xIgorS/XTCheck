@@ -1,11 +1,7 @@
-USE [Log]
-GO
+-- USE [Log] -- Removed: Connection already targets the correct database
+-- GO
 
-IF OBJECT_ID('monitoring.spGetDbSizeStats', 'P') IS NOT NULL
-    DROP PROCEDURE monitoring.spGetDbSizeStats
-GO
-
-CREATE PROCEDURE monitoring.spGetDbSizeStats
+CREATE OR ALTER PROCEDURE monitoring.spGetDbSizeStats
 AS
 BEGIN
     SET NOCOUNT ON;

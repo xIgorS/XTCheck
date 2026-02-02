@@ -52,22 +52,22 @@ public class DbSizeStatsRepository : IDbSizeStatsRepository
         {
             results.Add(new DbSizeStats
             {
-                ExtTime = reader.GetDateTime(extTimeOrdinal),
-                InstanceName = reader.GetString(instanceNameOrdinal),
-                DatabaseName = reader.GetString(databaseNameOrdinal),
-                LogicalFileName = reader.GetString(logicalFileNameOrdinal),
-                FileGroup = reader.GetString(fileGroupOrdinal),
-                PhysicalFileName = reader.GetString(physicalFileNameOrdinal),
-                FileType = reader.GetString(fileTypeOrdinal),
-                AllocatedSpaceMB = reader.GetInt64(allocatedSpaceMBOrdinal),
-                UsedSpaceMB = reader.GetInt64(usedSpaceMBOrdinal),
-                FreeSpaceMB = reader.GetInt64(freeSpaceMBOrdinal),
-                UsedPercent = reader.GetInt64(usedPercentOrdinal),
-                MaxSizeMB = reader.GetInt64(maxSizeMBOrdinal),
-                AutogrowSize = reader.GetString(autogrowSizeOrdinal),
-                TotalDriveMB = reader.GetInt64(totalDriveMBOrdinal),
-                FreeDriveMB = reader.GetInt64(freeDriveMBOrdinal),
-                FreeDrivePercent = reader.GetInt64(freeDrivePercentOrdinal)
+                ExtTime = reader.IsDBNull(extTimeOrdinal) ? default : reader.GetDateTime(extTimeOrdinal),
+                InstanceName = reader.IsDBNull(instanceNameOrdinal) ? string.Empty : reader.GetString(instanceNameOrdinal),
+                DatabaseName = reader.IsDBNull(databaseNameOrdinal) ? string.Empty : reader.GetString(databaseNameOrdinal),
+                LogicalFileName = reader.IsDBNull(logicalFileNameOrdinal) ? string.Empty : reader.GetString(logicalFileNameOrdinal),
+                FileGroup = reader.IsDBNull(fileGroupOrdinal) ? string.Empty : reader.GetString(fileGroupOrdinal),
+                PhysicalFileName = reader.IsDBNull(physicalFileNameOrdinal) ? string.Empty : reader.GetString(physicalFileNameOrdinal),
+                FileType = reader.IsDBNull(fileTypeOrdinal) ? string.Empty : reader.GetString(fileTypeOrdinal),
+                AllocatedSpaceMB = reader.IsDBNull(allocatedSpaceMBOrdinal) ? 0 : Convert.ToInt64(reader.GetDecimal(allocatedSpaceMBOrdinal)),
+                UsedSpaceMB = reader.IsDBNull(usedSpaceMBOrdinal) ? 0 : Convert.ToInt64(reader.GetDecimal(usedSpaceMBOrdinal)),
+                FreeSpaceMB = reader.IsDBNull(freeSpaceMBOrdinal) ? 0 : Convert.ToInt64(reader.GetDecimal(freeSpaceMBOrdinal)),
+                UsedPercent = reader.IsDBNull(usedPercentOrdinal) ? 0 : reader.GetInt32(usedPercentOrdinal),
+                MaxSizeMB = reader.IsDBNull(maxSizeMBOrdinal) ? 0 : Convert.ToInt64(reader.GetDecimal(maxSizeMBOrdinal)),
+                AutogrowSize = reader.IsDBNull(autogrowSizeOrdinal) ? string.Empty : reader.GetString(autogrowSizeOrdinal),
+                TotalDriveMB = reader.IsDBNull(totalDriveMBOrdinal) ? 0 : Convert.ToInt64(reader.GetDecimal(totalDriveMBOrdinal)),
+                FreeDriveMB = reader.IsDBNull(freeDriveMBOrdinal) ? 0 : Convert.ToInt64(reader.GetDecimal(freeDriveMBOrdinal)),
+                FreeDrivePercent = reader.IsDBNull(freeDrivePercentOrdinal) ? 0 : Convert.ToInt64(reader.GetDecimal(freeDrivePercentOrdinal))
             });
         }
 
@@ -103,13 +103,13 @@ public class DbSizeStatsRepository : IDbSizeStatsRepository
             {
                 DatabaseName = reader.GetString(databaseNameOrdinal),
                 FileGroup = reader.GetString(fileGroupOrdinal),
-                AllocatedDBSpaceMB = reader.GetInt64(allocatedDBSpaceMBOrdinal),
-                UsedDBSpaceMB = reader.GetInt64(usedDBSpaceMBOrdinal),
-                FreeDBSpaceMB = reader.GetInt64(freeDBSpaceMBOrdinal),
+                AllocatedDBSpaceMB = reader.GetInt32(allocatedDBSpaceMBOrdinal), // This is cast to INT in SQL
+                UsedDBSpaceMB = Convert.ToInt64(reader.GetDecimal(usedDBSpaceMBOrdinal)),
+                FreeDBSpaceMB = Convert.ToInt64(reader.GetDecimal(freeDBSpaceMBOrdinal)),
                 AutogrowEnabled = reader.GetInt32(autogrowEnabledOrdinal) == 1,
-                FreeDriveMB = reader.GetInt64(freeDriveMBOrdinal),
-                PartSizeMB = reader.GetInt64(partSizeMBOrdinal),
-                TotalFreeSpaceMB = reader.GetInt64(totalFreeSpaceMBOrdinal),
+                FreeDriveMB = Convert.ToInt64(reader.GetDecimal(freeDriveMBOrdinal)),
+                PartSizeMB = reader.GetInt32(partSizeMBOrdinal), // This is likely INT
+                TotalFreeSpaceMB = Convert.ToInt64(reader.GetDecimal(totalFreeSpaceMBOrdinal)),
                 AlertLevel = reader.GetString(alertLevelOrdinal)
             });
         }

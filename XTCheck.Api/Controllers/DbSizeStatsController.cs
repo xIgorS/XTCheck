@@ -24,7 +24,8 @@ public class DbSizeStatsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = "Failed to retrieve database size stats", Error = ex.Message });
+            Console.WriteLine($"[ERROR] GetDbSizeStatsAsync failed: {ex}");
+            return StatusCode(500, new { Message = "Failed to retrieve database size stats", Error = ex.Message, StackTrace = ex.StackTrace });
         }
     }
 

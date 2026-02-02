@@ -4,11 +4,9 @@ BEGIN
 END
 GO
 
-IF OBJECT_ID('[monitoring].[DBSizePlusDisk]', 'U') IS NOT NULL
-DROP TABLE [monitoring].[DBSizePlusDisk]
-GO
-
-CREATE TABLE [monitoring].[DBSizePlusDisk](
+IF OBJECT_ID('[monitoring].[DBSizePlusDisk]', 'U') IS NULL
+BEGIN
+    CREATE TABLE [monitoring].[DBSizePlusDisk](
     [ExtTime] [datetime2](0) NULL,
     [InstanceName] [nvarchar](128) NULL,
     [DatabaseName] [nvarchar](128) NULL,
@@ -26,9 +24,13 @@ CREATE TABLE [monitoring].[DBSizePlusDisk](
     [FreeDriveMB] [decimal](18, 0) NULL,
     [FreeDrivePercent] [decimal](5, 2) NULL
 ) ON [PRIMARY]
+END
 GO
 
-INSERT INTO [monitoring].[DBSizePlusDisk] VALUES ('2026-01-27 16:09:00', 'EURVOID07304\INSTSQL2017', 'DTM_FI', 'DTM_FI_PRIMARY1', 'PRIMARY', 'C:\Program Files\Delphix\DelphixConnector\4229d6...', 'ROWS', 98304.000000, 4804, 93499, 4, 66060288, '512.000000 MB', 66060288, 39903422, 60.40);
+-- Insert seed data only if table is empty
+IF NOT EXISTS (SELECT TOP 1 1 FROM [monitoring].[DBSizePlusDisk])
+BEGIN
+    INSERT INTO [monitoring].[DBSizePlusDisk] VALUES ('2026-01-27 16:09:00', 'EURVOID07304\INSTSQL2017', 'DTM_FI', 'DTM_FI_PRIMARY1', 'PRIMARY', 'C:\Program Files\Delphix\DelphixConnector\4229d6...', 'ROWS', 98304.000000, 4804, 93499, 4, 66060288, '512.000000 MB', 66060288, 39903422, 60.40);
 INSERT INTO [monitoring].[DBSizePlusDisk] VALUES ('2026-01-27 16:09:00', 'EURVOID07304\INSTSQL2017', 'DTM_FI', 'DTM_FI_log', 'N/A', 'C:\Program Files\Delphix\DelphixConnector\4229d6...', 'LOG', 870400.000000, 746, 869653, 0, 66060288, '512.000000 MB', 66060288, 39903422, 60.40);
 INSERT INTO [monitoring].[DBSizePlusDisk] VALUES ('2026-01-27 16:09:00', 'EURVOID07304\INSTSQL2017', 'DTM_FI', 'DTM_FI_PRIMARY2', 'PRIMARY', 'C:\Program Files\Delphix\DelphixConnector\4229d6...', 'ROWS', 98304.000000, 4772, 93532, 4, 66060288, '512.000000 MB', 66060288, 39903422, 60.40);
 INSERT INTO [monitoring].[DBSizePlusDisk] VALUES ('2026-01-27 16:09:00', 'EURVOID07304\INSTSQL2017', 'DTM_FI', 'DTM_FI_DATAFACT_11', 'DATAFACT_1', 'C:\Program Files\Delphix\DelphixConnector\4229d6...', 'ROWS', 1024000.000000, 967621, 56378, 94, 66060288, '512.000000 MB', 66060288, 39903422, 60.40);
@@ -39,3 +41,5 @@ INSERT INTO [monitoring].[DBSizePlusDisk] VALUES ('2026-01-27 16:09:00', 'EURVOI
 INSERT INTO [monitoring].[DBSizePlusDisk] VALUES ('2026-01-27 16:09:00', 'EURVOID07304\INSTSQL2017', 'DTM_FI', 'DTM_FI_DATAFACT_32', 'DATAFACT_3', 'C:\Program Files\Delphix\DelphixConnector\4229d6...', 'ROWS', 1024000.000000, 890365, 133634, 86, 66060288, '512.000000 MB', 66060288, 39903422, 60.40);
 INSERT INTO [monitoring].[DBSizePlusDisk] VALUES ('2026-01-27 16:09:00', 'EURVOID07304\INSTSQL2017', 'DTM_FI', 'DTM_FI_DATAFACT_41', 'DATAFACT_4', 'C:\Program Files\Delphix\DelphixConnector\4229d6...', 'ROWS', 970000.000000, 895472, 74527, 92, 66060288, '512.000000 MB', 66060288, 39903422, 60.40);
 INSERT INTO [monitoring].[DBSizePlusDisk] VALUES ('2026-01-27 16:09:00', 'EURVOID07304\INSTSQL2017', 'DTM_FI', 'DTM_FI_DATAFACT_42', 'DATAFACT_4', 'C:\Program Files\Delphix\DelphixConnector\4229d6...', 'ROWS', 880640.000000, 835744, 44895, 94, 66060288, '512.000000 MB', 66060288, 39903422, 60.40);
+END
+GO
