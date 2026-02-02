@@ -24,7 +24,7 @@ public class DbSizeStatsRepository : IDbSizeStatsRepository
         var results = new List<DbSizeStats>();
 
         await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-        using var command = new SqlCommand("dbo.spGetDbSizeStats", connection)
+        using var command = new SqlCommand("monitoring.spGetDbSizeStats", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -59,15 +59,15 @@ public class DbSizeStatsRepository : IDbSizeStatsRepository
                 FileGroup = reader.GetString(fileGroupOrdinal),
                 PhysicalFileName = reader.GetString(physicalFileNameOrdinal),
                 FileType = reader.GetString(fileTypeOrdinal),
-                AllocatedSpaceMB = reader.GetDecimal(allocatedSpaceMBOrdinal),
-                UsedSpaceMB = reader.GetDecimal(usedSpaceMBOrdinal),
-                FreeSpaceMB = reader.GetDecimal(freeSpaceMBOrdinal),
-                UsedPercent = reader.GetInt32(usedPercentOrdinal),
-                MaxSizeMB = reader.GetDecimal(maxSizeMBOrdinal),
+                AllocatedSpaceMB = reader.GetInt64(allocatedSpaceMBOrdinal),
+                UsedSpaceMB = reader.GetInt64(usedSpaceMBOrdinal),
+                FreeSpaceMB = reader.GetInt64(freeSpaceMBOrdinal),
+                UsedPercent = reader.GetInt64(usedPercentOrdinal),
+                MaxSizeMB = reader.GetInt64(maxSizeMBOrdinal),
                 AutogrowSize = reader.GetString(autogrowSizeOrdinal),
-                TotalDriveMB = reader.GetDecimal(totalDriveMBOrdinal),
-                FreeDriveMB = reader.GetDecimal(freeDriveMBOrdinal),
-                FreeDrivePercent = reader.GetDecimal(freeDrivePercentOrdinal)
+                TotalDriveMB = reader.GetInt64(totalDriveMBOrdinal),
+                FreeDriveMB = reader.GetInt64(freeDriveMBOrdinal),
+                FreeDrivePercent = reader.GetInt64(freeDrivePercentOrdinal)
             });
         }
 

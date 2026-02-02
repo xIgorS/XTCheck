@@ -9,13 +9,13 @@ public class DbSizeStats
     public string FileGroup { get; set; } = string.Empty;
     public string PhysicalFileName { get; set; } = string.Empty;
     public string FileType { get; set; } = string.Empty;
-    public decimal AllocatedSpaceMB { get; set; }
-    public decimal UsedSpaceMB { get; set; }
-    public decimal FreeSpaceMB { get; set; }
-    public int UsedPercent { get; set; }
-    public decimal MaxSizeMB { get; set; }
+    public long AllocatedSpaceMB { get; set; }
+    public long UsedSpaceMB { get; set; }
+    public long FreeSpaceMB { get; set; }
+    public long UsedPercent { get; set; }
+    public long MaxSizeMB { get; set; }
     public string AutogrowSize { get; set; } = string.Empty;
-    public decimal TotalDriveMB { get; set; }
-    public decimal FreeDriveMB { get; set; }
-    public decimal FreeDrivePercent { get; set; }
+    public long TotalDriveMB { get; set; }
+    public long FreeDriveMB { get; set; }
+    public long FreeDrivePercent { get; set; }
 }

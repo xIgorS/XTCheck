@@ -1,11 +1,11 @@
 USE [Log]
 GO
 
-IF OBJECT_ID('dbo.spGetDbSizeStats', 'P') IS NOT NULL
-    DROP PROCEDURE dbo.spGetDbSizeStats
+IF OBJECT_ID('monitoring.spGetDbSizeStats', 'P') IS NOT NULL
+    DROP PROCEDURE monitoring.spGetDbSizeStats
 GO
 
-CREATE PROCEDURE dbo.spGetDbSizeStats
+CREATE PROCEDURE monitoring.spGetDbSizeStats
 AS
 BEGIN
     SET NOCOUNT ON;
