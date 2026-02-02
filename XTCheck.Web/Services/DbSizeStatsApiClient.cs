@@ -15,9 +15,26 @@ public class DbSizeStatsApiClient : IDbSizeStatsApiClient
 
     public async Task<IEnumerable<DbSizeStats>> GetDbSizeStatsAsync()
     {
-        var result = await _httpClient.GetFromJsonAsync<IEnumerable<DbSizeStats>>("api/DbSizeStats");
-        _cachedStats = result ?? Enumerable.Empty<DbSizeStats>();
-        return _cachedStats;
+        try
+        {
+            Console.WriteLine($"[WEB] Calling API: {_httpClient.BaseAddress}api/DbSizeStats");
+            var result = await _httpClient.GetFromJsonAsync<IEnumerable<DbSizeStats>>("api/DbSizeStats");
+            _cachedStats = result ?? Enumerable.Empty<DbSizeStats>();
+            Console.WriteLine($"[WEB] API call successful, got {_cachedStats.Count()} records");
+            return _cachedStats;
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"[WEB] HTTP Error calling API: {ex.Message}");
+            if (ex.Data.Contains("StatusCode"))
+                Console.WriteLine($"[WEB] Status Code: {ex.Data["StatusCode"]}");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[WEB] General Error calling API: {ex.Message}");
+            throw;
+        }
     }
 
     public async Task<IEnumerable<DatabaseSizeAggregate>> GetAggregatedDbSizeStatsAsync()

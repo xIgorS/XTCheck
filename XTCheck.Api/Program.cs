@@ -55,10 +55,24 @@ if (isWindows)
             policy.RequireAssertion(context =>
             {
                 var userName = context.User.Identity?.Name;
+                var isAuthenticated = context.User.Identity?.IsAuthenticated ?? false;
+                var authType = context.User.Identity?.AuthenticationType;
                 var isAllowed = !string.IsNullOrEmpty(userName) && allowedUsers.Contains(userName);
                 
-                // Log authentication attempts
-                Console.WriteLine($"[AUTH] User: '{userName}' - Allowed: {isAllowed}");
+                // Enhanced logging for debugging
+                Console.WriteLine($"[AUTH DEBUG]");
+                Console.WriteLine($"  Raw User: '{userName}'");
+                Console.WriteLine($"  IsAuthenticated: {isAuthenticated}");
+                Console.WriteLine($"  AuthType: {authType}");
+                Console.WriteLine($"  Allowed Users: {string.Join(", ", allowedUsers)}");
+                Console.WriteLine($"  Contains Check: {isAllowed}");
+                Console.WriteLine($"  Claims Count: {context.User.Claims.Count()}");
+                
+                // Log all claims for debugging
+                foreach (var claim in context.User.Claims)
+                {
+                    Console.WriteLine($"  Claim: {claim.Type} = '{claim.Value}'");
+                }
                 
                 return isAllowed;
             });
@@ -66,6 +80,9 @@ if (isWindows)
 
         // Apply this policy to all endpoints by default
         options.FallbackPolicy = options.GetPolicy("AllowedUsersOnly");
+        
+        // Temporary: Allow any authenticated user for debugging
+        // options.FallbackPolicy = options.DefaultPolicy;
     });
 }
 else

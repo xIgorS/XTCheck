@@ -17,12 +17,16 @@ builder.Services.AddScoped<ContextMenuService>();
 // Configure HttpClient for API calls
 builder.Services.AddHttpClient<IDbSizeStatsApiClient, DbSizeStatsApiClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7160/");
+    client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5239/");
 })
 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
 {
     // Use default Windows credentials when running on Windows
-    UseDefaultCredentials = true
+    UseDefaultCredentials = true,
+    // Allow automatic redirection
+    AllowAutoRedirect = true,
+    // Set credential cache to use default network credentials
+    Credentials = System.Net.CredentialCache.DefaultNetworkCredentials
 });
 
 var app = builder.Build();
