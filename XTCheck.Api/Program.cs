@@ -79,10 +79,10 @@ if (isWindows)
         });
 
         // Apply this policy to all endpoints by default
-        options.FallbackPolicy = options.GetPolicy("AllowedUsersOnly");
+        // options.FallbackPolicy = options.GetPolicy("AllowedUsersOnly");
         
         // Temporary: Allow any authenticated user for debugging
-        // options.FallbackPolicy = options.DefaultPolicy;
+        options.FallbackPolicy = options.DefaultPolicy;
     });
 }
 else
