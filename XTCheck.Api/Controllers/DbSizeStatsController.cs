@@ -14,20 +14,6 @@ public class DbSizeStatsController : ControllerBase
         _dbSizeStatsService = dbSizeStatsService;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Get()
-    {
-        try
-        {
-            var stats = await _dbSizeStatsService.GetDbSizeStatsAsync();
-            return Ok(stats);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { Message = "Failed to retrieve database size stats", Error = ex.Message });
-        }
-    }
-
     [HttpGet("dbFreeSpaceAlert")]
     public async Task<IActionResult> GetDbFreeSpaceAlert()
     {
